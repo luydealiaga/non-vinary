@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Non-Vinary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  /* =========================================================
+     CONFIG VISUAL — inspirado en el mockup que mandó Kuy
+     ========================================================= */
+  :root{
+    --bg1:#3a5cff; --bg2:#ff5cc7; --bg3:#8b5cf6; --bg4:#34e0c4;
+    --black:#0e0e12; --white:#ffffff;
+    --glass: rgba(255,255,255,0.14);
+    --glass-border: rgba(255,255,255,0.35);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; font-family:'Poppins',sans-serif;
+    background: linear-gradient(120deg, var(--bg1) 0%, var(--bg3) 35%, var(--bg2) 65%, var(--bg4) 100%);
+    background-attachment: fixed;
+    color:var(--white);
+  }
+  h1,h2,h3{ font-weight:800; margin:0; }
+  a{color:inherit;}
+
+  /* Nav pill superior */
+  .nav{
+    display:flex; align-items:center; justify-content:space-between;
+    margin:16px auto; max-width:1000px; padding:10px 22px;
+    background:var(--white); color:var(--black);
+    border-radius:999px; box-shadow:0 8px 30px rgba(0,0,0,0.15);
+  }
+  .nav .logo{font-weight:800; font-size:18px;}
+  .nav .tabs{display:flex; gap:6px; background:#f1f1f4; border-radius:999px; padding:4px;}
+  .nav .tabs button{
+    border:none; background:transparent; padding:8px 16px; border-radius:999px;
+    font-family:'Poppins'; font-weight:600; font-size:14px; cursor:pointer; color:#555;
+  }
+  .nav .tabs button.active{background:var(--black); color:var(--white);}
+  .nav .user{display:flex; align-items:center; gap:10px; font-size:13px; color:#555;}
+  .nav .user button{
+    background:var(--black); color:var(--white); border:none; border-radius:999px;
+    padding:8px 16px; font-weight:600; cursor:pointer; font-family:'Poppins';
+  }
+
+  .wrap{max-width:1000px; margin:0 auto; padding:0 16px 100px;}
+
+  /* Login */
+  .login-screen{
+    min-height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column;
+    text-align:center; padding:24px;
+  }
+  .login-screen h1{font-size:52px; line-height:1.05; margin-bottom:14px;}
+  .login-screen p{font-size:16px; opacity:0.9; max-width:420px; margin:0 auto 26px;}
+  .login-box{
+    background:var(--glass); border:1px solid var(--glass-border); backdrop-filter: blur(14px);
+    border-radius:24px; padding:28px; width:100%; max-width:380px;
+  }
+  .login-box input{
+    width:100%; padding:14px 16px; border-radius:999px; border:none; margin-bottom:12px;
+    font-family:'Poppins'; font-size:14px; outline:none;
+  }
+  .login-box button{
+    width:100%; padding:14px 16px; border-radius:999px; border:none; cursor:pointer;
+    background:var(--black); color:var(--white); font-weight:700; font-family:'Poppins'; font-size:14px;
+  }
+  .login-msg{margin-top:12px; font-size:13px; opacity:0.9;}
+
+  /* Grid de vinos */
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:18px; margin-top:22px;}
+  .card{
+    background:var(--glass); border:1px solid var(--glass-border); backdrop-filter: blur(14px);
+    border-radius:20px; overflow:hidden; cursor:pointer; transition:transform .15s ease;
+  }
+  .card:hover{transform:translateY(-4px);}
+  .card .photo{width:100%; height:160px; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; overflow:hidden;}
+  .card .photo img{width:100%; height:100%; object-fit:cover;}
+  .card .info{padding:14px 16px;}
+  .card .info h3{font-size:16px;}
+  .card .info .sub{font-size:12px; opacity:0.85; margin-top:2px;}
+  .badge-row{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;}
+  .badge{background:rgba(0,0,0,0.35); border-radius:999px; padding:4px 10px; font-size:11px; font-weight:600;}
+  .badge.group{background:var(--black);}
+
+  .empty{opacity:0.8; text-align:center; padding:60px 20px; font-size:14px;}
+
+  /* Botón flotante agregar */
+  .fab{
+    position:fixed; bottom:26px; right:26px; background:var(--black); color:var(--white);
+    border:none; border-radius:999px; padding:16px 24px; font-weight:700; font-family:'Poppins';
+    font-size:14px; cursor:pointer; box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  }
+
+  /* Modales */
+  .overlay{
+    position:fixed; inset:0; background:rgba(10,10,15,0.55); backdrop-filter: blur(4px);
+    display:flex; align-items:center; justify-content:center; padding:16px; z-index:50;
+  }
+  .modal{
+    background:#1b1b24; color:var(--white); border-radius:24px; width:100%; max-width:520px;
+    max-height:88vh; overflow-y:auto; padding:26px;
+  }
+  .modal h2{font-size:22px; margin-bottom:4px;}
+  .modal .close{float:right; background:none; border:none; color:var(--white); font-size:20px; cursor:pointer;}
+  .field{margin-bottom:12px;}
+  .field label{display:block; font-size:12px; opacity:0.8; margin-bottom:6px; font-weight:600;}
+  .field input, .field select, .field textarea{
+    width:100%; padding:11px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.2);
+    background:rgba(255,255,255,0.08); color:var(--white); font-family:'Poppins'; font-size:14px; outline:none;
+  }
+  .field textarea{resize:vertical; min-height:60px;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .btn{
+    border:none; border-radius:999px; padding:12px 20px; font-weight:700; font-family:'Poppins';
+    font-size:14px; cursor:pointer;
+  }
+  .btn.primary{background:linear-gradient(120deg,var(--bg1),var(--bg2)); color:var(--white); width:100%;}
+  .btn.ghost{background:rgba(255,255,255,0.1); color:var(--white); width:100%;}
+
+  .modal .bottle-photo{width:100%; height:220px; border-radius:16px; object-fit:cover; margin-bottom:16px; background:rgba(255,255,255,0.08);}
+  .section-title{font-size:13px; text-transform:uppercase; letter-spacing:0.06em; opacity:0.7; margin:20px 0 10px;}
+  .comment{background:rgba(255,255,255,0.06); border-radius:14px; padding:10px 14px; margin-bottom:8px; font-size:13px;}
+  .comment b{font-size:12px; opacity:0.85;}
+  .critic-row{display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.06); border-radius:14px; padding:10px 14px; margin-bottom:8px; font-size:13px;}
+  .critic-row a{font-size:11px; opacity:0.7; text-decoration:underline;}
+  .score-pill{background:var(--black); border-radius:999px; padding:4px 12px; font-weight:700; font-size:13px;}
+  .hidden{display:none !important;}
+  .toast{
+    position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--black); color:var(--white);
+    padding:12px 20px; border-radius:999px; font-size:13px; z-index:100;
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="loginScreen" class="login-screen">
+  <h1>Non-Vinary</h1>
+  <p>Los vinos que tomamos, lo que opinamos entre todas, y los puntajes de los críticos — todo en un solo lugar.</p>
+  <div class="login-box">
+    <input id="emailInput" type="email" placeholder="tu email" />
+    <button id="sendLinkBtn">Entrar con link mágico</button>
+    <div id="loginMsg" class="login-msg"></div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app" class="hidden">
+  <div class="nav">
+    <div class="logo">🍷 Non-Vinary</div>
+    <div class="tabs">
+      <button id="tabTried" class="active">Tomamos</button>
+      <button id="tabWishlist">Para probar</button>
+    </div>
+    <div class="user">
+      <span id="userEmail"></span>
+      <button id="logoutBtn">Salir</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div id="grid" class="grid"></div>
+    <div id="emptyState" class="empty hidden"></div>
+  </div>
+
+  <button class="fab" id="addBtn">+ Agregar vino</button>
+</div>
+
+<!-- ================= MODAL: AGREGAR VINO ================= -->
+<div id="addOverlay" class="overlay hidden">
+  <div class="modal">
+    <button class="close" data-close="addOverlay">×</button>
+    <h2 id="addModalTitle">Agregar vino</h2>
+    <div class="field">
+      <label>Nombre del vino</label>
+      <input id="f_name" type="text" placeholder="Ej: Luigi Bosca Malbec" />
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Bodega</label>
+        <input id="f_winery" type="text" />
+      </div>
+      <div class="field">
+        <label>Añada</label>
+        <input id="f_vintage" type="text" placeholder="2021" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Región</label>
+      <input id="f_region" type="text" placeholder="Ej: Luján de Cuyo, Mendoza" />
+    </div>
+    <div class="field" id="recField">
+      <label>¿Quién lo recomendó / dónde lo vieron?</label>
+      <input id="f_recommended" type="text" placeholder="Ej: nos lo recomendó Sole" />
+    </div>
+    <div class="field">
+      <label>Foto de la botella</label>
+      <input id="f_photo" type="file" accept="image/*" />
+    </div>
+    <button class="btn primary" id="saveWineBtn">Guardar</button>
+  </div>
+</div>
+
+<!-- ================= MODAL: DETALLE DE VINO ================= -->
+<div id="detailOverlay" class="overlay hidden">
+  <div class="modal">
+    <button class="close" data-close="detailOverlay">×</button>
+    <img id="d_photo" class="bottle-photo hidden" />
+    <h2 id="d_name"></h2>
+    <div class="sub" id="d_sub" style="opacity:0.8; font-size:13px; margin-top:4px;"></div>
+
+    <div class="section-title">Puntajes de críticos</div>
+    <div id="criticList"></div>
+    <div class="row2">
+      <div class="field">
+        <label>Crítico</label>
+        <select id="f_critic">
+          <option>Tim Atkin</option>
+          <option>Paul Hobbs</option>
+          <option>Susana Balbo</option>
+          <option>Alejandro Vigil</option>
+          <option>Michel Rolland</option>
+          <option>James Suckling</option>
+          <option>The Wine Advocate</option>
+          <option>Wine Spectator</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Puntaje (0-100)</label>
+        <input id="f_criticScore" type="number" min="0" max="100" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Link de la fuente (opcional)</label>
+      <input id="f_criticSource" type="text" placeholder="https://..." />
+    </div>
+    <button class="btn ghost" id="addCriticBtn">Agregar puntaje de crítico</button>
+
+    <div class="section-title">Nuestros puntajes y comentarios</div>
+    <div id="ratingList"></div>
+    <div class="row2">
+      <div class="field">
+        <label>Tu puntaje (0-100)</label>
+        <input id="f_myScore" type="number" min="0" max="100" />
+      </div>
+      <div class="field">
+        <label>Tu comentario</label>
+        <input id="f_myComment" type="text" placeholder="¿Qué te pareció?" />
+      </div>
+    </div>
+    <button class="btn primary" id="addRatingBtn">Guardar mi puntaje</button>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script>
+/* =========================================================
+   CONFIGURACIÓN — completar con los datos de TU proyecto Supabase
+   (Project Settings > API en supabase.com)
+   ========================================================= */
+const SUPABASE_URL = "https://uxyaaahmmkpprxndvcby.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_53O716mUVbgTiDloqXW_Mg_QM2I-cjn";
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let currentTab = "tried";
+let currentWine = null; // vino abierto en el modal de detalle
+
+const $ = (id) => document.getElementById(id);
+
+function toast(msg){
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.remove("hidden");
+  setTimeout(()=> t.classList.add("hidden"), 2500);
+}
+
+/* ---------------- AUTH ---------------- */
+$("sendLinkBtn").onclick = async () => {
+  const email = $("emailInput").value.trim();
+  if(!email){ $("loginMsg").textContent = "Escribí tu email primero."; return; }
+  $("loginMsg").textContent = "Enviando...";
+  const { error } = await sb.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: window.location.href }
+  });
+  $("loginMsg").textContent = error ? ("Error: " + error.message) : "Listo, revisá tu email y tocá el link (puede tardar 1-2 min).";
+};
+
+$("logoutBtn").onclick = async () => { await sb.auth.signOut(); location.reload(); };
+
+sb.auth.onAuthStateChange((_event, session) => {
+  if (session && session.user){
+    currentUser = session.user;
+    ensureProfile();
+    $("loginScreen").classList.add("hidden");
+    $("app").classList.remove("hidden");
+    $("userEmail").textContent = currentUser.email;
+    loadWines();
+  } else {
+    $("loginScreen").classList.remove("hidden");
+    $("app").classList.add("hidden");
+  }
+});
+
+async function ensureProfile(){
+  await sb.from("profiles").upsert({ id: currentUser.id, display_name: currentUser.email.split("@")[0] });
+}
+
+/* ---------------- TABS ---------------- */
+$("tabTried").onclick = () => switchTab("tried");
+$("tabWishlist").onclick = () => switchTab("wishlist");
+function switchTab(tab){
+  currentTab = tab;
+  $("tabTried").classList.toggle("active", tab === "tried");
+  $("tabWishlist").classList.toggle("active", tab === "wishlist");
+  $("recField").classList.toggle("hidden", tab !== "wishlist");
+  $("addModalTitle").textContent = tab === "wishlist" ? "Agregar a la lista de deseos" : "Agregar vino que tomamos";
+  loadWines();
+}
+
+/* ---------------- CARGAR VINOS ---------------- */
+async function loadWines(){
+  const { data: wines, error } = await sb
+    .from("wines")
+    .select("*")
+    .eq("status", currentTab)
+    .order("created_at", { ascending: false });
+
+  const grid = $("grid");
+  const empty = $("emptyState");
+  grid.innerHTML = "";
+
+  if (error){ toast("Error cargando vinos: " + error.message); return; }
+
+  if (!wines || wines.length === 0){
+    empty.classList.remove("hidden");
+    empty.textContent = currentTab === "tried"
+      ? "Todavía no marcaron ningún vino como tomado. Tocá '+ Agregar vino'."
+      : "Todavía no hay vinos en la lista de deseos.";
+    return;
+  }
+  empty.classList.add("hidden");
+
+  for (const wine of wines){
+    const card = document.createElement("div");
+    card.className = "card";
+    card.onclick = () => openDetail(wine);
+
+    let badges = "";
+    if (currentTab === "tried"){
+      const { data: ratings } = await sb.from("group_ratings").select("score").eq("wine_id", wine.id);
+      if (ratings && ratings.length){
+        const avg = (ratings.reduce((a,b)=>a+Number(b.score||0),0) / ratings.length).toFixed(0);
+        badges += `<span class="badge group">Grupo: ${avg}</span>`;
+      }
+      const { data: critics } = await sb.from("critic_scores").select("critic_name, score").eq("wine_id", wine.id).limit(2);
+      (critics||[]).forEach(c => badges += `<span class="badge">${c.critic_name}: ${c.score ?? "-"}</span>`);
+    }
+
+    card.innerHTML = `
+      <div class="photo">${wine.photo_url ? `<img src="${wine.photo_url}">` : "🍷"}</div>
+      <div class="info">
+        <h3>${wine.name}</h3>
+        <div class="sub">${[wine.winery, wine.vintage].filter(Boolean).join(" · ")}</div>
+        ${wine.status === "wishlist" && wine.recommended_by ? `<div class="sub">💬 ${wine.recommended_by}</div>` : ""}
+        <div class="badge-row">${badges}</div>
+      </div>`;
+    grid.appendChild(card);
+  }
+}
+
+/* ---------------- AGREGAR VINO ---------------- */
+$("addBtn").onclick = () => $("addOverlay").classList.remove("hidden");
+document.querySelectorAll("[data-close]").forEach(btn => {
+  btn.onclick = () => $(btn.dataset.close).classList.add("hidden");
+});
+
+$("saveWineBtn").onclick = async () => {
+  const name = $("f_name").value.trim();
+  if (!name){ toast("Poné al menos el nombre del vino."); return; }
+
+  let photo_url = null;
+  const file = $("f_photo").files[0];
+  if (file){
+    const path = `${Date.now()}_${file.name}`;
+    const { error: upErr } = await sb.storage.from("wine-photos").upload(path, file);
+    if (upErr){ toast("Error subiendo la foto: " + upErr.message); }
+    else {
+      const { data } = sb.storage.from("wine-photos").getPublicUrl(path);
+      photo_url = data.publicUrl;
+    }
+  }
+
+  const { error } = await sb.from("wines").insert({
+    name,
+    winery: $("f_winery").value.trim(),
+    vintage: $("f_vintage").value.trim(),
+    region: $("f_region").value.trim(),
+    recommended_by: $("f_recommended").value.trim(),
+    photo_url,
+    status: currentTab,
+    added_by: currentUser.id
+  });
+
+  if (error){ toast("Error: " + error.message); return; }
+
+  ["f_name","f_winery","f_vintage","f_region","f_recommended"].forEach(id => $(id).value = "");
+  $("f_photo").value = "";
+  $("addOverlay").classList.add("hidden");
+  toast("Vino agregado 🍷");
+  loadWines();
+};
+
+/* ---------------- DETALLE DE VINO ---------------- */
+async function openDetail(wine){
+  currentWine = wine;
+  $("d_name").textContent = wine.name;
+  $("d_sub").textContent = [wine.winery, wine.vintage, wine.region].filter(Boolean).join(" · ");
+  if (wine.photo_url){
+    $("d_photo").src = wine.photo_url;
+    $("d_photo").classList.remove("hidden");
+  } else {
+    $("d_photo").classList.add("hidden");
+  }
+  await renderCritics();
+  await renderRatings();
+  $("detailOverlay").classList.remove("hidden");
+}
+
+async function renderCritics(){
+  const { data } = await sb.from("critic_scores").select("*").eq("wine_id", currentWine.id).order("created_at", { ascending:false });
+  const list = $("criticList");
+  list.innerHTML = "";
+  (data||[]).forEach(c => {
+    const row = document.createElement("div");
+    row.className = "critic-row";
+    row.innerHTML = `<span>${c.critic_name} ${c.source_url ? `· <a href="${c.source_url}" target="_blank">fuente</a>` : ""}</span><span class="score-pill">${c.score ?? "-"}</span>`;
+    list.appendChild(row);
+  });
+  if (!data || data.length === 0) list.innerHTML = `<div class="sub" style="opacity:0.7;font-size:13px;">Todavía no hay puntajes de críticos cargados.</div>`;
+}
+
+$("addCriticBtn").onclick = async () => {
+  const score = $("f_criticScore").value;
+  const { error } = await sb.from("critic_scores").insert({
+    wine_id: currentWine.id,
+    critic_name: $("f_critic").value,
+    score: score ? Number(score) : null,
+    source_url: $("f_criticSource").value.trim() || null,
+    added_by: currentUser.id
+  });
+  if (error){ toast("Error: " + error.message); return; }
+  $("f_criticScore").value = ""; $("f_criticSource").value = "";
+  renderCritics();
+  loadWines();
+};
+
+async function renderRatings(){
+  const { data } = await sb
+    .from("group_ratings")
+    .select("score, comment, user_id, profiles(display_name)")
+    .eq("wine_id", currentWine.id)
+    .order("created_at", { ascending:false });
+  const list = $("ratingList");
+  list.innerHTML = "";
+  (data||[]).forEach(r => {
+    const row = document.createElement("div");
+    row.className = "comment";
+    row.innerHTML = `<b>${(r.profiles && r.profiles.display_name) || "alguien"} · ${r.score ?? "-"}/100</b><br>${r.comment || ""}`;
+    list.appendChild(row);
+  });
+  if (!data || data.length === 0) list.innerHTML = `<div class="sub" style="opacity:0.7;font-size:13px;">Todavía nadie puso puntaje. ¡Sé la primera!</div>`;
+}
+
+$("addRatingBtn").onclick = async () => {
+  const score = $("f_myScore").value;
+  const { error } = await sb.from("group_ratings").upsert({
+    wine_id: currentWine.id,
+    user_id: currentUser.id,
+    score: score ? Number(score) : null,
+    comment: $("f_myComment").value.trim()
+  }, { onConflict: "wine_id,user_id" });
+  if (error){ toast("Error: " + error.message); return; }
+  $("f_myScore").value = ""; $("f_myComment").value = "";
+  renderRatings();
+  loadWines();
+  toast("Guardado 🙌");
+};
+</script>
+</body>
+</html>
