@@ -307,6 +307,33 @@
   .helper{font-size:12px; color:var(--ink-soft); line-height:1.5; font-weight:500;}
   .helper a{color:var(--coral); font-weight:700;}
 
+  /* ============ BODEGAS ============ */
+  .bodega-filters{display:flex; gap:7px; flex-wrap:wrap; margin:2px 0 14px;}
+  .bodega-filters button{
+    border:2px solid var(--ink); background:#fff; border-radius:999px; padding:7px 13px;
+    font-size:11.5px; font-weight:700; cursor:pointer; color:var(--ink);
+    text-transform:uppercase; letter-spacing:.03em; box-shadow:2px 2px 0 var(--ink); transition:.1s;
+  }
+  .bodega-filters button.on{background:var(--grad); }
+  .bodega-card{
+    background:var(--card); border:2px solid var(--ink); border-radius:var(--radius);
+    box-shadow:var(--hard); padding:16px; margin-bottom:16px;
+  }
+  .bodega-card h3{
+    margin:0 0 2px; font-size:17px; font-family:'Archivo Black',sans-serif;
+    letter-spacing:-.3px; text-transform:uppercase;
+  }
+  .bodega-card .zone{font-size:11.5px; color:var(--coral); font-weight:700; text-transform:uppercase; letter-spacing:.07em;}
+  .bodega-card .note{font-size:12.5px; color:var(--ink-soft); margin:7px 0 10px; line-height:1.5; font-weight:500;}
+  .svc-row{display:flex; gap:6px; flex-wrap:wrap;}
+  .svc{
+    font-size:10.5px; font-weight:700; border-radius:999px; padding:4px 10px;
+    border:2px solid var(--ink); background:#fff; text-transform:uppercase; letter-spacing:.02em;
+  }
+  .svc.v{background:#e9e4ff;} .svc.d{background:#ffe3f1;} .svc.a{background:#fff3d6;}
+  .svc.c{background:#dcf5e3;} .svc.h{background:#ffe0d1;}
+  .bodega-card .web{display:inline-block; margin-top:10px; font-size:12px; font-weight:700; color:var(--purple);}
+
   .toast{
     position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:var(--ink);
     color:#efeada; padding:12px 22px; border-radius:999px; font-size:13px; font-weight:700; z-index:300;
@@ -344,10 +371,13 @@
   <div class="tabs">
     <button id="tabTried" class="active">🍷 Tomamos</button>
     <button id="tabWishlist">🔖 Para probar</button>
+    <button id="tabBodegas">🏔️ Bodegas</button>
   </div>
 
   <div class="wrap">
     <div id="countLine" class="count-line"></div>
+    <div id="bodegaFilters" class="bodega-filters hidden"></div>
+    <div id="bodegaIntro" class="helper hidden" style="margin:0 4px 14px;"></div>
     <div id="list"></div>
     <div id="emptyState" class="empty hidden"></div>
   </div>
@@ -356,6 +386,7 @@
     <button id="navTried" class="active"><span class="ico">🍷</span>Tomamos</button>
     <button class="fab" id="addBtn">+</button>
     <button id="navWishlist"><span class="ico">🔖</span>Para probar</button>
+    <button id="navBodegas"><span class="ico">🏔️</span>Bodegas</button>
   </div>
 </div>
 
@@ -392,9 +423,15 @@
         <input id="f_grape" type="text" placeholder="Malbec" />
       </div>
     </div>
-    <div class="field">
-      <label>País</label>
-      <input id="f_country" type="text" placeholder="Argentina" />
+    <div class="row2">
+      <div class="field">
+        <label>País</label>
+        <input id="f_country" type="text" placeholder="Argentina" />
+      </div>
+      <div class="field">
+        <label>Precio aprox (US$)</label>
+        <input id="f_price" type="number" inputmode="decimal" min="0" step="0.5" placeholder="25" />
+      </div>
     </div>
     <div class="field hidden" id="recField">
       <label>¿Quién lo recomendó / dónde lo vieron?</label>
@@ -479,6 +516,7 @@
       <input id="f_criticSource" type="text" placeholder="https://..." />
     </div>
     <button class="btn ghost" id="addCriticBtn">Agregar puntaje de crítico</button>
+    <button class="btn hidden" id="deleteWineBtn" style="margin-top:24px; color:var(--coral);">🗑 Eliminar este vino</button>
   </div>
 </div>
 
@@ -751,7 +789,38 @@ let ratingsByWine = {};      // wine_id -> [scores]
 let likesByWine = {};        // wine_id -> {count, mine}
 let criticsByWine = {};      // wine_id -> [scores]
 let myStars = 0;             // selección actual del input de estrellas
-let hasExtraCols = true;     // country/grape en la tabla wines
+let hasExtraCols = true;     // country/grape/price_usd en la tabla wines
+let profilesById = {};       // user_id -> display_name
+let activeSvc = new Set();   // filtros activos en tab Bodegas
+
+/* =========================================================
+   BODEGAS DE MENDOZA CON ENOTURISMO — operan todo el año
+   (agosto = temporada baja: siempre reservar antes)
+   s: v=visita, d=degustación, a=almuerzo, c=cena, h=hospedaje
+   ========================================================= */
+const SVC_LABELS = {v:"Visita", d:"Degustación", a:"Almuerzo", c:"Cena", h:"Hospedaje"};
+const BODEGAS = [
+{n:"Zuccardi Valle de Uco",z:"Paraje Altamira, Valle de Uco",s:["v","d","a","c"],w:"https://www.familiazuccardi.com",note:"Piedra Infinita Cocina: almuerzo todos los días; cena jueves a sábado. Elegida varias veces mejor bodega del mundo para visitar."},
+{n:"Catena Zapata",z:"Agrelo, Luján de Cuyo",s:["v","d","a"],w:"https://www.catenawines.com",note:"La pirámide maya icónica. Visitas y catas premium + restaurante Angélica Cocina Maestra."},
+{n:"Casa Vigil (El Enemigo)",z:"Chachingo, Maipú",s:["v","d","a","c"],w:"https://www.casavigil.com",note:"El restaurante de Alejandro Vigil, con Estrella Michelin. Almuerzos y cenas con reserva."},
+{n:"Bodegas Salentein",z:"Los Árboles, Valle de Uco",s:["v","d","a","c","h"],w:"https://www.bodegasalentein.com",note:"Posada Salentein (16 habitaciones), restaurante entre viñedos y espacio de arte Killka."},
+{n:"Susana Balbo Wines",z:"Agrelo, Luján de Cuyo",s:["v","d","a","h"],w:"https://www.susanabalbowines.com.ar",note:"Restaurante Osadía de Crear + SB Winemaker's House & Spa Suites en Chacras de Coria."},
+{n:"Kaiken",z:"Vistalba, Luján de Cuyo",s:["v","d","a"],w:"https://www.kaikenwines.com",note:"Ramos Generales, el restaurante de Francis Mallmann. Juego de Blend con etiqueta propia."},
+{n:"Lagarde",z:"Luján de Cuyo",s:["v","d","a","c"],w:"https://www.lagarde.com.ar",note:"Bodega centenaria. Restaurante Fogón (recomendado Michelin) y Zonda Cocina de Paisaje."},
+{n:"Ruca Malen",z:"Agrelo, Luján de Cuyo",s:["v","d","a"],w:"https://www.bodegarucamalen.com",note:"Pionera del maridaje gourmet paso a paso. Recomendada por la Guía Michelin."},
+{n:"Trapiche",z:"Coquimbito, Maipú",s:["v","d","a","c"],w:"https://www.trapiche.com.ar",note:"Casona histórica renovada + Espacio Trapiche, cocina de huerta propia."},
+{n:"Bodega Norton",z:"Perdriel, Luján de Cuyo",s:["v","d","a"],w:"https://www.norton.com.ar",note:"Restaurante La Vid. Visitas clásicas y catas de Malbec de distintas alturas."},
+{n:"Andeluna",z:"Gualtallary, Tupungato",s:["v","d","a"],w:"https://www.andeluna.com.ar",note:"Vista directa al Cordón del Plata. Menú de pasos con maridaje al pie de la montaña."},
+{n:"Bodega Vistalba",z:"Vistalba, Luján de Cuyo",s:["v","d","a"],w:"https://www.bodegavistalba.com",note:"Bodega de Carlos Pulenta con restaurante La Bourgogne. Blending Game para armar tu corte."},
+{n:"Cruzat",z:"Perdriel, Luján de Cuyo",s:["v","d"],w:"https://www.bodegacruzat.com",note:"Espumantes método tradicional. Programa Family & Kids en vacaciones de invierno."},
+{n:"Club Tapiz",z:"Russell, Maipú",s:["d","a","c","h"],w:"https://www.club-tapiz.com.ar",note:"Petit hotel entre viñedos con restaurante de 3 pasos y spa. A 20 min de la ciudad."},
+{n:"Cavas Wine Lodge",z:"Agrelo, Luján de Cuyo",s:["d","a","c","h"],w:"https://www.cavaswinelodge.com",note:"Relais & Châteaux con spa de vinoterapia. Almuerzos y cenas abiertos con reserva."},
+{n:"Entre Cielos",z:"Vistalba, Luján de Cuyo",s:["d","a","c","h"],w:"https://www.entrecielos.com",note:"Wine & wellness lodge con hamam. Restaurante de cocina argentina moderna."},
+{n:"Casa de Uco",z:"Los Chacayes, Tunuyán",s:["v","d","a","c","h"],w:"https://www.casadeuco.com",note:"Hotel de diseño entre viñedos con cocina de estación e ingredientes de la finca."},
+{n:"The Vines Resort & Spa",z:"Los Chacayes, Tunuyán",s:["v","d","a","c","h"],w:"https://www.vinesresortandspa.com",note:"Villas de lujo + Siete Fuegos de Francis Mallmann, asado a fuego abierto."},
+{n:"Rosell Boher Lodge",z:"Russell, Maipú",s:["d","a","c","h"],w:"https://www.rosellboherlodge.com",note:"Lodge boutique de la casa de espumantes. Restaurante de pasos con maridaje."},
+{n:"Domaine Bousquet",z:"Tupungato, Valle de Uco",s:["v","d","a","h"],w:"https://www.domainebousquet.com",note:"Vinos orgánicos + Gaia Restó y lodge. Desayunos de campo y menús veggie-friendly."}
+];
 
 const $ = (id) => document.getElementById(id);
 const norm = (s) => (s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
@@ -803,13 +872,70 @@ function switchTab(tab){
   currentTab = tab;
   ["tabTried","navTried"].forEach(id => $(id).classList.toggle("active", tab==="tried"));
   ["tabWishlist","navWishlist"].forEach(id => $(id).classList.toggle("active", tab==="wishlist"));
+  ["tabBodegas","navBodegas"].forEach(id => $(id).classList.toggle("active", tab==="bodegas"));
+  const isBodegas = tab === "bodegas";
+  $("addBtn").classList.toggle("hidden", isBodegas);
+  $("bodegaFilters").classList.toggle("hidden", !isBodegas);
+  $("bodegaIntro").classList.toggle("hidden", !isBodegas);
   $("recField").classList.toggle("hidden", tab !== "wishlist");
   $("addModalTitle").textContent = tab === "wishlist" ? "Agregar a “Para probar”" : "Agregar vino que tomamos";
-  loadWines();
+  $("searchInput").placeholder = isBodegas ? "Buscar bodega o zona..." : "Buscar vino, bodega, región...";
+  if (isBodegas){
+    $("bodegaIntro").innerHTML = "Bodegas de Mendoza con enoturismo, abiertas todo el año (agosto = temporada baja: menos gente y mejores precios, pero <b>siempre con reserva previa</b>, ideal 2-3 semanas antes). Tocá los filtros según lo que busques.";
+    renderBodegaFilters();
+    renderBodegas();
+  } else {
+    loadWines();
+  }
 }
 $("tabTried").onclick = $("navTried").onclick = () => switchTab("tried");
 $("tabWishlist").onclick = $("navWishlist").onclick = () => switchTab("wishlist");
-$("searchInput").oninput = () => renderList();
+$("tabBodegas").onclick = $("navBodegas").onclick = () => switchTab("bodegas");
+$("searchInput").oninput = () => currentTab === "bodegas" ? renderBodegas() : renderList();
+
+/* ---------------- BODEGAS ---------------- */
+function renderBodegaFilters(){
+  const box = $("bodegaFilters");
+  box.innerHTML = Object.entries(SVC_LABELS).map(([k,lbl]) =>
+    `<button data-svc="${k}" class="${activeSvc.has(k)?"on":""}">${{v:"🚶",d:"🍷",a:"🍽",c:"🌙",h:"🛏"}[k]} ${lbl}</button>`
+  ).join("");
+  box.querySelectorAll("button").forEach(b => {
+    b.onclick = () => {
+      const k = b.dataset.svc;
+      activeSvc.has(k) ? activeSvc.delete(k) : activeSvc.add(k);
+      renderBodegaFilters();
+      renderBodegas();
+    };
+  });
+}
+
+function renderBodegas(){
+  const q = norm($("searchInput").value.trim());
+  const list = $("list"); const empty = $("emptyState");
+  list.innerHTML = "";
+  const rows = BODEGAS.filter(b =>
+    (!q || norm(b.n + " " + b.z).includes(q)) &&
+    [...activeSvc].every(s => b.s.includes(s))
+  );
+  $("countLine").textContent = rows.length ? `${rows.length} bodega${rows.length>1?"s":""}` : "";
+  if (!rows.length){
+    empty.classList.remove("hidden");
+    empty.innerHTML = `<div class="big">🏔️</div>Ninguna bodega cumple todos esos filtros.<br>Probá sacando alguno.`;
+    return;
+  }
+  empty.classList.add("hidden");
+  for (const b of rows){
+    const card = document.createElement("div");
+    card.className = "bodega-card";
+    card.innerHTML = `
+      <div class="zone">${b.z}</div>
+      <h3>${b.n}</h3>
+      <div class="svc-row">${b.s.map(s => `<span class="svc ${s}">${SVC_LABELS[s]}</span>`).join("")}</div>
+      <div class="note">${b.note}</div>
+      <a class="web" href="${b.w}" target="_blank" rel="noopener">Sitio web y reservas →</a>`;
+    list.appendChild(card);
+  }
+}
 
 /* ---------------- CARGA DE DATOS (sin N+1) ---------------- */
 async function loadWines(){
@@ -821,11 +947,13 @@ async function loadWines(){
   const ids = allWines.map(w => w.id);
   ratingsByWine = {}; likesByWine = {}; criticsByWine = {};
   if (ids.length){
-    const [r1, r2, r3] = await Promise.all([
+    const [r1, r2, r3, r4] = await Promise.all([
       sb.from("group_ratings").select("wine_id, score").in("wine_id", ids),
       sb.from("wine_likes").select("wine_id, user_id").in("wine_id", ids),
       sb.from("critic_scores").select("wine_id, score").in("wine_id", ids),
+      sb.from("profiles").select("id, display_name"),
     ]);
+    (r4.data||[]).forEach(p => profilesById[p.id] = p.display_name);
     (r1.data||[]).forEach(r => (ratingsByWine[r.wine_id] ||= []).push(Number(r.score||0)));
     (r2.data||[]).forEach(l => {
       const o = (likesByWine[l.wine_id] ||= {count:0, mine:false});
@@ -871,6 +999,7 @@ function renderList(){
         <div class="winery">${w.winery || "&nbsp;"}</div>
         <h3>${w.name}${w.vintage ? ` <span style="font-weight:500;color:var(--ink-soft)">${w.vintage}</span>` : ""}</h3>
         <div class="meta">${[w.region, w.country].filter(Boolean).join(" · ") || ""}</div>
+        <div class="meta" style="margin-top:2px;">👤 ${profilesById[w.added_by] || "alguien"}${w.price_usd ? ` &nbsp;·&nbsp; <b>~US$ ${Number(w.price_usd)}</b>` : ""}</div>
         <div class="rating-line">
           ${stars != null ? `<span class="avg-num">${stars.toFixed(1)}</span>${starsHTML(stars)}<span class="rate-count">(${scores.length})</span>` : `<span class="rate-count">Sin puntajes todavía</span>`}
         </div>
@@ -1002,19 +1131,23 @@ $("saveWineBtn").onclick = async () => {
     recommended_by: $("f_recommended").value.trim(),
     photo_url, status: currentTab, added_by: currentUser.id
   };
-  if (hasExtraCols){ row.country = $("f_country").value.trim(); row.grape = $("f_grape").value.trim(); }
+  if (hasExtraCols){
+    row.country = $("f_country").value.trim();
+    row.grape = $("f_grape").value.trim();
+    row.price_usd = $("f_price").value ? Number($("f_price").value) : null;
+  }
 
   let { error } = await sb.from("wines").insert(row);
-  if (error && /country|grape/.test(error.message)){
+  if (error && /country|grape|price_usd/.test(error.message)){
     // columnas nuevas aún no creadas → reintenta sin ellas
     hasExtraCols = false;
-    delete row.country; delete row.grape;
+    delete row.country; delete row.grape; delete row.price_usd;
     ({ error } = await sb.from("wines").insert(row));
   }
   $("saveWineBtn").textContent = "Guardar 🍷";
   if (error){ toast("Error: " + error.message); return; }
 
-  ["f_name","f_winery","f_vintage","f_region","f_country","f_grape","f_recommended"].forEach(id => $(id).value = "");
+  ["f_name","f_winery","f_vintage","f_region","f_country","f_grape","f_price","f_recommended"].forEach(id => $(id).value = "");
   photoFile = null;
   $("photoPreview").classList.add("hidden");
   $("f_photo_camera").value = ""; $("f_photo_gallery").value = "";
@@ -1028,7 +1161,10 @@ async function openDetail(wine){
   currentWine = wine;
   $("d_winery").textContent = wine.winery || "";
   $("d_name").textContent = wine.name + (wine.vintage ? " " + wine.vintage : "");
-  $("d_meta").textContent = [wine.region, wine.country, wine.grape].filter(Boolean).join(" · ");
+  $("d_meta").textContent = [wine.region, wine.country, wine.grape,
+    wine.price_usd ? `~US$ ${Number(wine.price_usd)}` : null,
+    `subido por ${profilesById[wine.added_by] || "alguien"}`].filter(Boolean).join(" · ");
+  $("deleteWineBtn").classList.toggle("hidden", wine.added_by !== currentUser.id);
   if (wine.photo_url){
     $("d_photo").src = wine.photo_url;
     $("d_photo").classList.remove("hidden");
@@ -1059,6 +1195,15 @@ function renderLikeFloat(){
   $("d_likeCount").textContent = like.count;
 }
 $("d_likeBtn").onclick = () => toggleLike(currentWine.id);
+
+$("deleteWineBtn").onclick = async () => {
+  if (!confirm(`¿Eliminar "${currentWine.name}"? Se borran también sus puntajes, likes y comentarios.`)) return;
+  const { error } = await sb.from("wines").delete().eq("id", currentWine.id);
+  if (error){ toast("Error: " + error.message); return; }
+  toast("Vino eliminado 🗑");
+  $("detailOverlay").classList.add("hidden");
+  loadWines();
+};
 
 $("markTriedBtn").onclick = async () => {
   const { error } = await sb.from("wines").update({ status:"tried" }).eq("id", currentWine.id);
