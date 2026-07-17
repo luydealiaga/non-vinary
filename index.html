@@ -2,136 +2,271 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Non-Vinary</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#7a1230" />
+<title>Non-Vinary 🍷</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
-  /* =========================================================
-     CONFIG VISUAL — inspirado en el mockup que mandó Kuy
-     ========================================================= */
   :root{
-    --bg1:#3a5cff; --bg2:#ff5cc7; --bg3:#8b5cf6; --bg4:#34e0c4;
-    --black:#0e0e12; --white:#ffffff;
-    --glass: rgba(255,255,255,0.14);
-    --glass-border: rgba(255,255,255,0.35);
+    --wine:#7a1230;          /* rojo vino principal */
+    --wine-dark:#4d0a1e;
+    --wine-light:#a3234a;
+    --gold:#c9962e;
+    --paper:#f7f4f0;         /* fondo cálido tipo Vivino */
+    --card:#ffffff;
+    --ink:#241a1d;
+    --ink-soft:#7d6f73;
+    --line:#eee6e2;
+    --star:#b01e3f;
+    --like:#e0355f;
+    --radius:18px;
+    --shadow:0 6px 24px rgba(77,10,30,.10);
   }
-  *{box-sizing:border-box;}
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
   body{
-    margin:0; min-height:100vh; font-family:'Poppins',sans-serif;
-    background: linear-gradient(120deg, var(--bg1) 0%, var(--bg3) 35%, var(--bg2) 65%, var(--bg4) 100%);
-    background-attachment: fixed;
-    color:var(--white);
+    font-family:'Poppins',sans-serif; background:var(--paper); color:var(--ink);
+    min-height:100vh; padding-bottom:calc(84px + env(safe-area-inset-bottom));
   }
-  h1,h2,h3{ font-weight:800; margin:0; }
-  a{color:inherit;}
+  .serif{font-family:'Playfair Display',serif;}
+  .hidden{display:none !important;}
+  button{font-family:'Poppins',sans-serif;}
 
-  /* Nav pill superior */
-  .nav{
-    display:flex; align-items:center; justify-content:space-between;
-    margin:16px auto; max-width:1000px; padding:10px 22px;
-    background:var(--white); color:var(--black);
-    border-radius:999px; box-shadow:0 8px 30px rgba(0,0,0,0.15);
-  }
-  .nav .logo{font-weight:800; font-size:18px;}
-  .nav .tabs{display:flex; gap:6px; background:#f1f1f4; border-radius:999px; padding:4px;}
-  .nav .tabs button{
-    border:none; background:transparent; padding:8px 16px; border-radius:999px;
-    font-family:'Poppins'; font-weight:600; font-size:14px; cursor:pointer; color:#555;
-  }
-  .nav .tabs button.active{background:var(--black); color:var(--white);}
-  .nav .user{display:flex; align-items:center; gap:10px; font-size:13px; color:#555;}
-  .nav .user button{
-    background:var(--black); color:var(--white); border:none; border-radius:999px;
-    padding:8px 16px; font-weight:600; cursor:pointer; font-family:'Poppins';
-  }
-
-  .wrap{max-width:1000px; margin:0 auto; padding:0 16px 100px;}
-
-  /* Login */
+  /* ============ LOGIN ============ */
   .login-screen{
-    min-height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column;
-    text-align:center; padding:24px;
+    position:fixed; inset:0; z-index:200; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center; padding:28px;
+    background:
+      radial-gradient(120% 90% at 80% -10%, #a3234a 0%, transparent 55%),
+      radial-gradient(120% 90% at 10% 110%, #2e0713 0%, transparent 60%),
+      linear-gradient(160deg, #5c0d24 0%, #7a1230 45%, #3a0817 100%);
+    color:#fff;
   }
-  .login-screen h1{font-size:52px; line-height:1.05; margin-bottom:14px;}
-  .login-screen p{font-size:16px; opacity:0.9; max-width:420px; margin:0 auto 26px;}
-  .login-box{
-    background:var(--glass); border:1px solid var(--glass-border); backdrop-filter: blur(14px);
-    border-radius:24px; padding:28px; width:100%; max-width:380px;
+  .login-screen .glass{
+    background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.25);
+    backdrop-filter:blur(16px); border-radius:26px; padding:30px 26px; width:100%; max-width:380px;
   }
-  .login-box input{
-    width:100%; padding:14px 16px; border-radius:999px; border:none; margin-bottom:12px;
-    font-family:'Poppins'; font-size:14px; outline:none;
+  .login-screen h1{font-size:46px; margin:0 0 6px; letter-spacing:-1px;}
+  .login-screen .tag{opacity:.92; font-size:14px; margin:0 auto 28px; max-width:340px; line-height:1.5;}
+  .login-screen input{
+    width:100%; padding:15px 18px; border-radius:999px; border:none; margin-bottom:12px;
+    font-family:'Poppins'; font-size:15px; outline:none;
   }
-  .login-box button{
-    width:100%; padding:14px 16px; border-radius:999px; border:none; cursor:pointer;
-    background:var(--black); color:var(--white); font-weight:700; font-family:'Poppins'; font-size:14px;
+  .login-screen button{
+    width:100%; padding:15px 18px; border-radius:999px; border:none; cursor:pointer;
+    background:var(--gold); color:#2e0713; font-weight:700; font-size:15px;
   }
-  .login-msg{margin-top:12px; font-size:13px; opacity:0.9;}
+  .login-msg{margin-top:12px; font-size:13px; opacity:.95; min-height:18px;}
 
-  /* Grid de vinos */
-  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:18px; margin-top:22px;}
-  .card{
-    background:var(--glass); border:1px solid var(--glass-border); backdrop-filter: blur(14px);
-    border-radius:20px; overflow:hidden; cursor:pointer; transition:transform .15s ease;
+  /* ============ HEADER ============ */
+  .top{
+    position:sticky; top:0; z-index:40;
+    background:linear-gradient(150deg, var(--wine-dark), var(--wine) 70%, var(--wine-light));
+    color:#fff; padding:16px 18px 54px; border-radius:0 0 28px 28px;
+    box-shadow:var(--shadow);
   }
-  .card:hover{transform:translateY(-4px);}
-  .card .photo{width:100%; height:160px; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; overflow:hidden;}
-  .card .photo img{width:100%; height:100%; object-fit:cover;}
-  .card .info{padding:14px 16px;}
-  .card .info h3{font-size:16px;}
-  .card .info .sub{font-size:12px; opacity:0.85; margin-top:2px;}
-  .badge-row{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;}
-  .badge{background:rgba(0,0,0,0.35); border-radius:999px; padding:4px 10px; font-size:11px; font-weight:600;}
-  .badge.group{background:var(--black);}
+  .top .bar{display:flex; align-items:center; justify-content:space-between; max-width:760px; margin:0 auto;}
+  .top .logo{font-size:24px; letter-spacing:-.5px;}
+  .top .who{display:flex; align-items:center; gap:8px; font-size:12px; opacity:.95;}
+  .top .who button{
+    background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.3);
+    color:#fff; border-radius:999px; padding:6px 14px; font-size:12px; font-weight:600; cursor:pointer;
+  }
+  .search-wrap{max-width:760px; margin:14px auto 0; position:relative;}
+  .search-wrap input{
+    width:100%; padding:13px 18px 13px 44px; border-radius:999px; border:none; outline:none;
+    font-family:'Poppins'; font-size:14px; background:rgba(255,255,255,.94); color:var(--ink);
+  }
+  .search-wrap .icon{position:absolute; left:16px; top:50%; transform:translateY(-50%); opacity:.5; font-size:15px;}
 
-  .empty{opacity:0.8; text-align:center; padding:60px 20px; font-size:14px;}
+  /* Tabs flotantes */
+  .tabs{
+    max-width:760px; margin:-30px auto 0; position:relative; z-index:41;
+    display:flex; gap:6px; background:var(--card); border-radius:999px; padding:5px;
+    box-shadow:var(--shadow); width:calc(100% - 36px);
+  }
+  .tabs button{
+    flex:1; border:none; background:transparent; padding:11px 4px; border-radius:999px;
+    font-weight:600; font-size:13.5px; cursor:pointer; color:var(--ink-soft); transition:.15s;
+  }
+  .tabs button.active{background:var(--wine); color:#fff;}
 
-  /* Botón flotante agregar */
-  .fab{
-    position:fixed; bottom:26px; right:26px; background:var(--black); color:var(--white);
-    border:none; border-radius:999px; padding:16px 24px; font-weight:700; font-family:'Poppins';
-    font-size:14px; cursor:pointer; box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  /* ============ LISTA DE VINOS ============ */
+  .wrap{max-width:760px; margin:0 auto; padding:18px;}
+  .count-line{font-size:12.5px; color:var(--ink-soft); margin:2px 4px 12px;}
+  .wine-card{
+    display:flex; gap:14px; background:var(--card); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:14px; margin-bottom:14px; cursor:pointer;
+    transition:transform .12s ease; border:1px solid var(--line);
+  }
+  .wine-card:active{transform:scale(.985);}
+  .wine-card .photo{
+    width:86px; min-width:86px; height:118px; border-radius:12px; overflow:hidden;
+    background:linear-gradient(160deg,#f3e8e6,#e8d5d2); display:flex; align-items:center; justify-content:center; font-size:34px;
+  }
+  .wine-card .photo img{width:100%; height:100%; object-fit:cover;}
+  .wine-card .body{flex:1; min-width:0; display:flex; flex-direction:column;}
+  .wine-card .winery{font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); font-weight:600;}
+  .wine-card h3{margin:2px 0 1px; font-size:16.5px; line-height:1.25; font-weight:700;}
+  .wine-card .meta{font-size:12px; color:var(--ink-soft);}
+  .rating-line{display:flex; align-items:center; gap:8px; margin-top:8px; flex-wrap:wrap;}
+  .stars{position:relative; display:inline-block; font-size:16px; line-height:1; color:#ddcfd3; letter-spacing:2px;}
+  .stars .fill{
+    position:absolute; inset:0; overflow:hidden; white-space:nowrap; color:var(--star); letter-spacing:2px;
+  }
+  .avg-num{font-weight:700; font-size:15px; color:var(--wine);}
+  .rate-count{font-size:11px; color:var(--ink-soft);}
+  .card-foot{display:flex; align-items:center; gap:10px; margin-top:auto; padding-top:8px; flex-wrap:wrap;}
+  .chip{
+    font-size:11px; font-weight:600; border-radius:999px; padding:4px 10px;
+    background:#f6ecee; color:var(--wine);
+  }
+  .chip.critic{background:#f3ead6; color:#7a5a10;}
+  .like-btn{
+    margin-left:auto; border:none; background:transparent; cursor:pointer; display:flex;
+    align-items:center; gap:5px; font-size:13px; font-weight:600; color:var(--ink-soft); padding:4px 6px;
+  }
+  .like-btn .heart{font-size:18px; transition:transform .15s;}
+  .like-btn.liked{color:var(--like);}
+  .like-btn.liked .heart{transform:scale(1.15);}
+  .empty{
+    text-align:center; color:var(--ink-soft); padding:70px 24px; font-size:14px; line-height:1.6;
+  }
+  .empty .big{font-size:44px; margin-bottom:10px;}
+
+  /* ============ BOTTOM NAV ============ */
+  .bottom-nav{
+    position:fixed; left:0; right:0; bottom:0; z-index:60;
+    background:var(--card); border-top:1px solid var(--line);
+    display:flex; justify-content:space-around; align-items:center;
+    padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+  }
+  .bottom-nav button{
+    border:none; background:transparent; font-size:11px; font-weight:600; color:var(--ink-soft);
+    display:flex; flex-direction:column; align-items:center; gap:2px; cursor:pointer; padding:4px 14px;
+  }
+  .bottom-nav button .ico{font-size:21px;}
+  .bottom-nav button.active{color:var(--wine);}
+  .bottom-nav .fab{
+    background:linear-gradient(150deg,var(--wine),var(--wine-light)); color:#fff;
+    border-radius:50%; width:58px; height:58px; margin-top:-30px; font-size:28px; font-weight:400;
+    display:flex; align-items:center; justify-content:center; box-shadow:0 8px 22px rgba(122,18,48,.45);
+    padding:0; flex-direction:row;
   }
 
-  /* Modales */
+  /* ============ MODALES (bottom sheet) ============ */
   .overlay{
-    position:fixed; inset:0; background:rgba(10,10,15,0.55); backdrop-filter: blur(4px);
-    display:flex; align-items:center; justify-content:center; padding:16px; z-index:50;
+    position:fixed; inset:0; background:rgba(30,8,16,.55); backdrop-filter:blur(3px);
+    display:flex; align-items:flex-end; justify-content:center; z-index:100;
   }
-  .modal{
-    background:#1b1b24; color:var(--white); border-radius:24px; width:100%; max-width:520px;
-    max-height:88vh; overflow-y:auto; padding:26px;
+  @media(min-width:640px){ .overlay{align-items:center; padding:24px;} }
+  .sheet{
+    background:var(--card); color:var(--ink); width:100%; max-width:560px;
+    border-radius:26px 26px 0 0; max-height:92vh; overflow-y:auto; padding:10px 22px 30px;
+    animation:up .22s ease;
   }
-  .modal h2{font-size:22px; margin-bottom:4px;}
-  .modal .close{float:right; background:none; border:none; color:var(--white); font-size:20px; cursor:pointer;}
-  .field{margin-bottom:12px;}
-  .field label{display:block; font-size:12px; opacity:0.8; margin-bottom:6px; font-weight:600;}
+  @media(min-width:640px){ .sheet{border-radius:26px;} }
+  @keyframes up{from{transform:translateY(40px); opacity:.6;} to{transform:none; opacity:1;}}
+  .grab{width:44px; height:5px; border-radius:99px; background:var(--line); margin:8px auto 14px;}
+  .sheet h2{margin:0 0 2px; font-size:21px;}
+  .sheet .close{
+    float:right; background:#f4edee; border:none; width:34px; height:34px; border-radius:50%;
+    font-size:16px; cursor:pointer; color:var(--ink);
+  }
+  .field{margin-bottom:13px; position:relative;}
+  .field label{display:block; font-size:11.5px; font-weight:600; color:var(--ink-soft); margin-bottom:5px; text-transform:uppercase; letter-spacing:.05em;}
   .field input, .field select, .field textarea{
-    width:100%; padding:11px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.2);
-    background:rgba(255,255,255,0.08); color:var(--white); font-family:'Poppins'; font-size:14px; outline:none;
+    width:100%; padding:12px 14px; border-radius:13px; border:1.5px solid var(--line);
+    background:#fbf9f8; color:var(--ink); font-family:'Poppins'; font-size:14.5px; outline:none;
   }
-  .field textarea{resize:vertical; min-height:60px;}
+  .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--wine-light);}
   .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
   .btn{
-    border:none; border-radius:999px; padding:12px 20px; font-weight:700; font-family:'Poppins';
-    font-size:14px; cursor:pointer;
+    border:none; border-radius:999px; padding:14px 22px; font-weight:700; font-size:14.5px; cursor:pointer; width:100%;
   }
-  .btn.primary{background:linear-gradient(120deg,var(--bg1),var(--bg2)); color:var(--white); width:100%;}
-  .btn.ghost{background:rgba(255,255,255,0.1); color:var(--white); width:100%;}
+  .btn.primary{background:linear-gradient(150deg,var(--wine),var(--wine-light)); color:#fff;}
+  .btn.ghost{background:#f4edee; color:var(--wine);}
+  .btn.small{width:auto; padding:10px 18px; font-size:13px;}
 
-  .modal .bottle-photo{width:100%; height:220px; border-radius:16px; object-fit:cover; margin-bottom:16px; background:rgba(255,255,255,0.08);}
-  .section-title{font-size:13px; text-transform:uppercase; letter-spacing:0.06em; opacity:0.7; margin:20px 0 10px;}
-  .comment{background:rgba(255,255,255,0.06); border-radius:14px; padding:10px 14px; margin-bottom:8px; font-size:13px;}
-  .comment b{font-size:12px; opacity:0.85;}
-  .critic-row{display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.06); border-radius:14px; padding:10px 14px; margin-bottom:8px; font-size:13px;}
-  .critic-row a{font-size:11px; opacity:0.7; text-decoration:underline;}
-  .score-pill{background:var(--black); border-radius:999px; padding:4px 12px; font-weight:700; font-size:13px;}
-  .hidden{display:none !important;}
+  /* Autocomplete */
+  .suggest{
+    position:absolute; top:100%; left:0; right:0; z-index:20; background:var(--card);
+    border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow);
+    max-height:230px; overflow-y:auto; margin-top:4px;
+  }
+  .suggest .opt{padding:11px 14px; cursor:pointer; border-bottom:1px solid var(--line);}
+  .suggest .opt:last-child{border-bottom:none;}
+  .suggest .opt:hover{background:#faf3f4;}
+  .suggest .opt b{display:block; font-size:14px;}
+  .suggest .opt span{font-size:11.5px; color:var(--ink-soft);}
+  .suggest .opt .src{float:right; font-size:10px; color:var(--gold); font-weight:700;}
+
+  /* Foto: cámara / galería */
+  .photo-actions{display:flex; gap:10px;}
+  .photo-actions .btn{flex:1;}
+  .photo-preview{
+    width:100%; height:190px; border-radius:16px; object-fit:cover; margin-top:10px;
+    border:1.5px solid var(--line);
+  }
+
+  /* ============ DETALLE ============ */
+  .detail-hero{
+    margin:0 -22px; height:270px; background:linear-gradient(160deg,#f3e8e6,#e8d5d2);
+    display:flex; align-items:center; justify-content:center; font-size:70px; position:relative; overflow:hidden;
+  }
+  .detail-hero img{width:100%; height:100%; object-fit:cover;}
+  .detail-hero .like-float{
+    position:absolute; right:16px; bottom:14px; background:var(--card); border:none; border-radius:999px;
+    padding:9px 16px; font-weight:700; font-size:14px; cursor:pointer; display:flex; gap:6px; align-items:center;
+    box-shadow:var(--shadow); color:var(--ink-soft);
+  }
+  .detail-hero .like-float.liked{color:var(--like);}
+  .d-winery{font-size:12px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-soft); font-weight:600; margin-top:16px;}
+  .d-name{font-size:24px; margin:2px 0 2px;}
+  .d-meta{font-size:13px; color:var(--ink-soft); margin-bottom:6px;}
+  .score-board{
+    display:flex; gap:10px; margin:14px 0 4px;
+  }
+  .score-box{
+    flex:1; background:#fbf6f7; border:1px solid var(--line); border-radius:16px; padding:12px 14px; text-align:center;
+  }
+  .score-box .num{font-size:23px; font-weight:800; color:var(--wine);}
+  .score-box .lbl{font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); font-weight:600; margin-top:2px;}
+  .section-title{
+    font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-soft);
+    font-weight:700; margin:22px 0 10px; display:flex; align-items:center; gap:8px;
+  }
+  .section-title:after{content:""; flex:1; height:1px; background:var(--line);}
+
+  /* input de estrellas */
+  .star-input{display:flex; gap:6px; font-size:36px; cursor:pointer; user-select:none; justify-content:center; margin:6px 0 2px; color:#ddcfd3;}
+  .star-input span{position:relative; display:inline-block;}
+  .star-input span .half, .star-input span .full{
+    position:absolute; inset:0; color:var(--star); overflow:hidden; width:0%;
+  }
+  .star-input-value{text-align:center; font-size:13px; color:var(--ink-soft); margin-bottom:10px; min-height:18px;}
+
+  .comment{
+    background:#fbf6f7; border:1px solid var(--line); border-radius:14px; padding:11px 14px; margin-bottom:9px; font-size:13.5px;
+  }
+  .comment .head{display:flex; align-items:center; justify-content:space-between; margin-bottom:3px;}
+  .comment .who{font-weight:700; font-size:12.5px;}
+  .comment .stars{font-size:13px;}
+  .critic-row{
+    display:flex; justify-content:space-between; align-items:center; background:#fdf9f0;
+    border:1px solid #f0e3c8; border-radius:14px; padding:10px 14px; margin-bottom:8px; font-size:13px;
+  }
+  .critic-row a{font-size:11px; color:var(--gold); font-weight:600;}
+  .score-pill{background:var(--wine); color:#fff; border-radius:999px; padding:4px 13px; font-weight:700; font-size:13px;}
+  .helper{font-size:12px; color:var(--ink-soft); line-height:1.5;}
+  .helper a{color:var(--wine); font-weight:600;}
+
   .toast{
-    position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--black); color:var(--white);
-    padding:12px 20px; border-radius:999px; font-size:13px; z-index:100;
+    position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:var(--ink);
+    color:#fff; padding:12px 22px; border-radius:999px; font-size:13px; z-index:300; box-shadow:var(--shadow);
+    white-space:nowrap;
   }
 </style>
 </head>
@@ -139,10 +274,10 @@
 
 <!-- ================= LOGIN ================= -->
 <div id="loginScreen" class="login-screen">
-  <h1>Non-Vinary</h1>
-  <p>Los vinos que tomamos, lo que opinamos entre todas, y los puntajes de los críticos — todo en un solo lugar.</p>
-  <div class="login-box">
-    <input id="emailInput" type="email" placeholder="tu email" />
+  <h1 class="serif">Non-Vinary</h1>
+  <p class="tag">Los vinos que tomamos, lo que opinamos entre todas, y los puntajes de los críticos — todo en un solo lugar. 🍷</p>
+  <div class="glass">
+    <input id="emailInput" type="email" placeholder="tu email" autocomplete="email" />
     <button id="sendLinkBtn">Entrar con link mágico</button>
     <div id="loginMsg" class="login-msg"></div>
   </div>
@@ -150,34 +285,47 @@
 
 <!-- ================= APP ================= -->
 <div id="app" class="hidden">
-  <div class="nav">
-    <div class="logo">🍷 Non-Vinary</div>
-    <div class="tabs">
-      <button id="tabTried" class="active">Tomamos</button>
-      <button id="tabWishlist">Para probar</button>
+  <div class="top">
+    <div class="bar">
+      <div class="logo serif">Non-Vinary</div>
+      <div class="who"><span id="userEmail"></span><button id="logoutBtn">Salir</button></div>
     </div>
-    <div class="user">
-      <span id="userEmail"></span>
-      <button id="logoutBtn">Salir</button>
+    <div class="search-wrap">
+      <span class="icon">🔍</span>
+      <input id="searchInput" type="text" placeholder="Buscar vino, bodega, región..." />
     </div>
+  </div>
+
+  <div class="tabs">
+    <button id="tabTried" class="active">🍷 Tomamos</button>
+    <button id="tabWishlist">🔖 Para probar</button>
   </div>
 
   <div class="wrap">
-    <div id="grid" class="grid"></div>
+    <div id="countLine" class="count-line"></div>
+    <div id="list"></div>
     <div id="emptyState" class="empty hidden"></div>
   </div>
 
-  <button class="fab" id="addBtn">+ Agregar vino</button>
+  <div class="bottom-nav">
+    <button id="navTried" class="active"><span class="ico">🍷</span>Tomamos</button>
+    <button class="fab" id="addBtn">+</button>
+    <button id="navWishlist"><span class="ico">🔖</span>Para probar</button>
+  </div>
 </div>
 
 <!-- ================= MODAL: AGREGAR VINO ================= -->
 <div id="addOverlay" class="overlay hidden">
-  <div class="modal">
-    <button class="close" data-close="addOverlay">×</button>
+  <div class="sheet">
+    <div class="grab"></div>
+    <button class="close" data-close="addOverlay">✕</button>
     <h2 id="addModalTitle">Agregar vino</h2>
+    <p class="helper" style="margin:4px 0 16px;">Empezá a escribir el nombre y te sugerimos de nuestro catálogo. 🪄</p>
+
     <div class="field">
       <label>Nombre del vino</label>
-      <input id="f_name" type="text" placeholder="Ej: Luigi Bosca Malbec" />
+      <input id="f_name" type="text" placeholder="Ej: El Enemigo Malbec" autocomplete="off" />
+      <div id="suggestBox" class="suggest hidden"></div>
     </div>
     <div class="row2">
       <div class="field">
@@ -186,53 +334,99 @@
       </div>
       <div class="field">
         <label>Añada</label>
-        <input id="f_vintage" type="text" placeholder="2021" />
+        <input id="f_vintage" type="number" inputmode="numeric" placeholder="2021" min="1950" max="2035" />
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Región / terroir</label>
+        <input id="f_region" type="text" placeholder="Gualtallary, Valle de Uco" />
+      </div>
+      <div class="field">
+        <label>Uva</label>
+        <input id="f_grape" type="text" placeholder="Malbec" />
       </div>
     </div>
     <div class="field">
-      <label>Región</label>
-      <input id="f_region" type="text" placeholder="Ej: Luján de Cuyo, Mendoza" />
+      <label>País</label>
+      <input id="f_country" type="text" placeholder="Argentina" />
     </div>
-    <div class="field" id="recField">
+    <div class="field hidden" id="recField">
       <label>¿Quién lo recomendó / dónde lo vieron?</label>
       <input id="f_recommended" type="text" placeholder="Ej: nos lo recomendó Sole" />
     </div>
+
     <div class="field">
       <label>Foto de la botella</label>
-      <input id="f_photo" type="file" accept="image/*" />
+      <div class="photo-actions">
+        <button type="button" class="btn ghost" id="cameraBtn">📷 Sacar foto</button>
+        <button type="button" class="btn ghost" id="galleryBtn">🖼️ Galería</button>
+      </div>
+      <input id="f_photo_camera" type="file" accept="image/*" capture="environment" class="hidden" />
+      <input id="f_photo_gallery" type="file" accept="image/*" class="hidden" />
+      <img id="photoPreview" class="photo-preview hidden" />
     </div>
-    <button class="btn primary" id="saveWineBtn">Guardar</button>
+
+    <button class="btn primary" id="saveWineBtn">Guardar 🍷</button>
   </div>
 </div>
 
-<!-- ================= MODAL: DETALLE DE VINO ================= -->
+<!-- ================= MODAL: DETALLE ================= -->
 <div id="detailOverlay" class="overlay hidden">
-  <div class="modal">
-    <button class="close" data-close="detailOverlay">×</button>
-    <img id="d_photo" class="bottle-photo hidden" />
-    <h2 id="d_name"></h2>
-    <div class="sub" id="d_sub" style="opacity:0.8; font-size:13px; margin-top:4px;"></div>
+  <div class="sheet">
+    <div class="grab"></div>
+    <button class="close" data-close="detailOverlay" style="position:absolute; margin:6px 0 0 6px; z-index:5; float:none;">✕</button>
+    <div class="detail-hero" id="d_hero">
+      <span id="d_emoji">🍷</span>
+      <img id="d_photo" class="hidden" />
+      <button id="d_likeBtn" class="like-float"><span class="heart">♥</span><span id="d_likeCount">0</span></button>
+    </div>
+    <div class="d-winery" id="d_winery"></div>
+    <h2 class="d-name serif" id="d_name"></h2>
+    <div class="d-meta" id="d_meta"></div>
+
+    <div class="score-board">
+      <div class="score-box"><div class="num" id="d_avgStars">—</div><div class="lbl">Nuestro promedio ★</div></div>
+      <div class="score-box"><div class="num" id="d_criticAvg">—</div><div class="lbl">Críticos /100</div></div>
+      <div class="score-box"><div class="num" id="d_ratingCount">0</div><div class="lbl">Opiniones</div></div>
+    </div>
+
+    <button class="btn ghost hidden" id="markTriedBtn" style="margin-top:8px;">✅ ¡Lo tomamos! Pasar a “Tomamos”</button>
+
+    <div class="section-title">Tu puntaje</div>
+    <div class="star-input" id="starInput">
+      <span data-i="1">★<span class="full">★</span></span><span data-i="2">★<span class="full">★</span></span><span data-i="3">★<span class="full">★</span></span><span data-i="4">★<span class="full">★</span></span><span data-i="5">★<span class="full">★</span></span>
+    </div>
+    <div class="star-input-value" id="starValue">Tocá las estrellas (medias incluidas)</div>
+    <div class="field">
+      <input id="f_myComment" type="text" placeholder="¿Qué te pareció? Aromas, en qué momento lo tomarías..." />
+    </div>
+    <button class="btn primary" id="addRatingBtn">Guardar mi puntaje ⭐</button>
+
+    <div class="section-title">Lo que opinamos</div>
+    <div id="ratingList"></div>
 
     <div class="section-title">Puntajes de críticos</div>
     <div id="criticList"></div>
+    <p class="helper" id="criticSearchLinks" style="margin:2px 0 12px;"></p>
     <div class="row2">
       <div class="field">
-        <label>Crítico</label>
+        <label>Crítico / revista</label>
         <select id="f_critic">
           <option>Tim Atkin</option>
-          <option>Paul Hobbs</option>
-          <option>Susana Balbo</option>
-          <option>Alejandro Vigil</option>
-          <option>Michel Rolland</option>
           <option>James Suckling</option>
           <option>The Wine Advocate</option>
           <option>Wine Spectator</option>
+          <option>Decanter</option>
+          <option>Descorchados</option>
+          <option>Vinous</option>
+          <option>Guía Austral Spectator</option>
           <option>Otro</option>
         </select>
       </div>
       <div class="field">
         <label>Puntaje (0-100)</label>
-        <input id="f_criticScore" type="number" min="0" max="100" />
+        <input id="f_criticScore" type="number" min="0" max="100" inputmode="numeric" />
       </div>
     </div>
     <div class="field">
@@ -240,46 +434,296 @@
       <input id="f_criticSource" type="text" placeholder="https://..." />
     </div>
     <button class="btn ghost" id="addCriticBtn">Agregar puntaje de crítico</button>
-
-    <div class="section-title">Nuestros puntajes y comentarios</div>
-    <div id="ratingList"></div>
-    <div class="row2">
-      <div class="field">
-        <label>Tu puntaje (0-100)</label>
-        <input id="f_myScore" type="number" min="0" max="100" />
-      </div>
-      <div class="field">
-        <label>Tu comentario</label>
-        <input id="f_myComment" type="text" placeholder="¿Qué te pareció?" />
-      </div>
-    </div>
-    <button class="btn primary" id="addRatingBtn">Guardar mi puntaje</button>
   </div>
 </div>
 
 <div id="toast" class="toast hidden"></div>
 
 <script>
+/* Catálogo base de vinos — n: nombre, b: bodega, r: región, p: país, u: uva */
+const WINE_CATALOG = [
+/* ===== ARGENTINA — Catena Zapata ===== */
+{n:"Catena Malbec",b:"Catena Zapata",r:"Mendoza",p:"Argentina",u:"Malbec"},
+{n:"Catena Alta Malbec",b:"Catena Zapata",r:"Mendoza",p:"Argentina",u:"Malbec"},
+{n:"Nicolás Catena Zapata",b:"Catena Zapata",r:"Mendoza",p:"Argentina",u:"Blend tinto"},
+{n:"Angélica Zapata Malbec",b:"Catena Zapata",r:"Mendoza",p:"Argentina",u:"Malbec"},
+{n:"Adrianna Vineyard Fortuna Terrae",b:"Catena Zapata",r:"Gualtallary, Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Adrianna Vineyard White Bones",b:"Catena Zapata",r:"Gualtallary, Valle de Uco",p:"Argentina",u:"Chardonnay"},
+{n:"Saint Felicien Malbec",b:"Catena Zapata",r:"Mendoza",p:"Argentina",u:"Malbec"},
+{n:"Saint Felicien Cabernet Sauvignon",b:"Catena Zapata",r:"Mendoza",p:"Argentina",u:"Cabernet Sauvignon"},
+{n:"Alamos Malbec",b:"Catena Zapata",r:"Mendoza",p:"Argentina",u:"Malbec"},
+{n:"DV Catena Cabernet-Malbec",b:"Catena Zapata",r:"Mendoza",p:"Argentina",u:"Blend tinto"},
+/* ===== El Enemigo / Aleanna ===== */
+{n:"El Enemigo Malbec",b:"Aleanna",r:"Gualtallary, Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"El Enemigo Chardonnay",b:"Aleanna",r:"Gualtallary, Valle de Uco",p:"Argentina",u:"Chardonnay"},
+{n:"El Enemigo Cabernet Franc",b:"Aleanna",r:"Gualtallary, Valle de Uco",p:"Argentina",u:"Cabernet Franc"},
+{n:"El Enemigo Bonarda",b:"Aleanna",r:"Mendoza",p:"Argentina",u:"Bonarda"},
+{n:"Gran Enemigo",b:"Aleanna",r:"Mendoza",p:"Argentina",u:"Blend tinto"},
+{n:"Gran Enemigo Gualtallary Single Vineyard",b:"Aleanna",r:"Gualtallary, Valle de Uco",p:"Argentina",u:"Cabernet Franc"},
+{n:"Gran Enemigo Agrelo Single Vineyard",b:"Aleanna",r:"Agrelo, Luján de Cuyo",p:"Argentina",u:"Cabernet Franc"},
+{n:"Gran Enemigo El Cepillo Single Vineyard",b:"Aleanna",r:"El Cepillo, Valle de Uco",p:"Argentina",u:"Cabernet Franc"},
+/* ===== Zuccardi ===== */
+{n:"Zuccardi Q Malbec",b:"Zuccardi",r:"Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Zuccardi Serie A Malbec",b:"Zuccardi",r:"Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Zuccardi Serie A Torrontés",b:"Zuccardi",r:"Salta",p:"Argentina",u:"Torrontés"},
+{n:"Zuccardi Concreto Malbec",b:"Zuccardi",r:"Paraje Altamira, Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Zuccardi Aluvional",b:"Zuccardi",r:"Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Zuccardi Finca Piedra Infinita",b:"Zuccardi",r:"Paraje Altamira, Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Zuccardi Polígonos San Pablo",b:"Zuccardi",r:"San Pablo, Valle de Uco",p:"Argentina",u:"Cabernet Franc"},
+{n:"Zuccardi Polígonos Gualtallary",b:"Zuccardi",r:"Gualtallary, Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Santa Julia Malbec",b:"Santa Julia (Zuccardi)",r:"Mendoza",p:"Argentina",u:"Malbec"},
+{n:"Santa Julia Orgánico Cabernet Sauvignon",b:"Santa Julia (Zuccardi)",r:"Mendoza",p:"Argentina",u:"Cabernet Sauvignon"},
+/* ===== Rutini ===== */
+{n:"Rutini Malbec",b:"Rutini Wines",r:"Tupungato, Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Rutini Cabernet-Malbec",b:"Rutini Wines",r:"Tupungato, Valle de Uco",p:"Argentina",u:"Blend tinto"},
+{n:"Rutini Encuentro Malbec",b:"Rutini Wines",r:"Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Rutini Apartado Gran Malbec",b:"Rutini Wines",r:"Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Felipe Rutini",b:"Rutini Wines",r:"Valle de Uco",p:"Argentina",u:"Blend tinto"},
+{n:"Trumpeter Malbec",b:"Rutini Wines",r:"Mendoza",p:"Argentina",u:"Malbec"},
+/* ===== Luigi Bosca ===== */
+{n:"Luigi Bosca Malbec",b:"Luigi Bosca",r:"Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Luigi Bosca De Sangre Malbec DOC",b:"Luigi Bosca",r:"Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Luigi Bosca Finca Los Nobles Malbec Verdot",b:"Luigi Bosca",r:"Las Compuertas, Luján de Cuyo",p:"Argentina",u:"Blend tinto"},
+{n:"Luigi Bosca Gala 1",b:"Luigi Bosca",r:"Mendoza",p:"Argentina",u:"Blend tinto"},
+{n:"La Linda Malbec",b:"Luigi Bosca",r:"Mendoza",p:"Argentina",u:"Malbec"},
+/* ===== Norton ===== */
+{n:"Norton Reserva Malbec",b:"Bodega Norton",r:"Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Norton Privada",b:"Bodega Norton",r:"Luján de Cuyo",p:"Argentina",u:"Blend tinto"},
+{n:"Norton Gernot Langes",b:"Bodega Norton",r:"Luján de Cuyo",p:"Argentina",u:"Blend tinto"},
+{n:"Norton Lote Negro",b:"Bodega Norton",r:"Luján de Cuyo",p:"Argentina",u:"Blend tinto"},
+/* ===== Trapiche ===== */
+{n:"Trapiche Malbec Oak Cask",b:"Trapiche",r:"Mendoza",p:"Argentina",u:"Malbec"},
+{n:"Trapiche Medalla Malbec",b:"Trapiche",r:"Mendoza",p:"Argentina",u:"Malbec"},
+{n:"Trapiche Iscay Malbec-Cabernet Franc",b:"Trapiche",r:"Mendoza",p:"Argentina",u:"Blend tinto"},
+{n:"Trapiche Terroir Series Finca Ambrosia",b:"Trapiche",r:"Gualtallary, Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Fond de Cave Reserva Malbec",b:"Trapiche",r:"Mendoza",p:"Argentina",u:"Malbec"},
+/* ===== Salentein ===== */
+{n:"Salentein Reserve Malbec",b:"Bodegas Salentein",r:"Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Salentein Numina",b:"Bodegas Salentein",r:"Valle de Uco",p:"Argentina",u:"Blend tinto"},
+{n:"Salentein Primus Malbec",b:"Bodegas Salentein",r:"Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Portillo Malbec",b:"Bodegas Salentein",r:"Valle de Uco",p:"Argentina",u:"Malbec"},
+/* ===== Achával Ferrer ===== */
+{n:"Achával Ferrer Quimera",b:"Achával Ferrer",r:"Mendoza",p:"Argentina",u:"Blend tinto"},
+{n:"Achával Ferrer Finca Altamira",b:"Achával Ferrer",r:"Paraje Altamira, Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Achával Ferrer Malbec",b:"Achával Ferrer",r:"Mendoza",p:"Argentina",u:"Malbec"},
+/* ===== Viña Cobos ===== */
+{n:"Cobos Malbec",b:"Viña Cobos",r:"Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Bramare Malbec Luján de Cuyo",b:"Viña Cobos",r:"Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Bramare Malbec Valle de Uco",b:"Viña Cobos",r:"Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Felino Malbec",b:"Viña Cobos",r:"Mendoza",p:"Argentina",u:"Malbec"},
+{n:"Cocodrilo Corte",b:"Viña Cobos",r:"Mendoza",p:"Argentina",u:"Blend tinto"},
+/* ===== Susana Balbo ===== */
+{n:"Crios Malbec",b:"Susana Balbo Wines",r:"Mendoza",p:"Argentina",u:"Malbec"},
+{n:"Crios Torrontés",b:"Susana Balbo Wines",r:"Salta",p:"Argentina",u:"Torrontés"},
+{n:"Susana Balbo Signature Malbec",b:"Susana Balbo Wines",r:"Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Susana Balbo Signature White Blend",b:"Susana Balbo Wines",r:"Valle de Uco",p:"Argentina",u:"Blend blanco"},
+{n:"Nosotros Single Vineyard Malbec",b:"Susana Balbo Wines",r:"Paraje Altamira, Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"BenMarco VIM",b:"Susana Balbo Wines",r:"Valle de Uco",p:"Argentina",u:"Blend tinto"},
+{n:"BenMarco Expresivo",b:"Susana Balbo Wines",r:"Valle de Uco",p:"Argentina",u:"Blend tinto"},
+/* ===== Terrazas / Chandon ===== */
+{n:"Terrazas de los Andes Reserva Malbec",b:"Terrazas de los Andes",r:"Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Terrazas de los Andes Grand Malbec",b:"Terrazas de los Andes",r:"Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Cheval des Andes",b:"Terrazas de los Andes / Cheval Blanc",r:"Luján de Cuyo",p:"Argentina",u:"Blend tinto"},
+{n:"Chandon Brut",b:"Chandon Argentina",r:"Mendoza",p:"Argentina",u:"Espumante"},
+{n:"Baron B Cuvée Millésimée",b:"Chandon Argentina",r:"Valle de Uco",p:"Argentina",u:"Espumante"},
+{n:"Cruzat Cuvée Brut",b:"Bodega Cruzat",r:"Mendoza",p:"Argentina",u:"Espumante"},
+{n:"Rosell Boher Grand Cuvée",b:"Rosell Boher",r:"Mendoza",p:"Argentina",u:"Espumante"},
+/* ===== Kaiken ===== */
+{n:"Kaiken Ultra Malbec",b:"Kaiken",r:"Mendoza",p:"Argentina",u:"Malbec"},
+{n:"Kaiken Mai",b:"Kaiken",r:"Mendoza",p:"Argentina",u:"Malbec"},
+{n:"Kaiken Terroir Series Corte",b:"Kaiken",r:"Mendoza",p:"Argentina",u:"Blend tinto"},
+/* ===== Salta / Cafayate ===== */
+{n:"Colomé Estate Malbec",b:"Bodega Colomé",r:"Valle Calchaquí, Salta",p:"Argentina",u:"Malbec"},
+{n:"Colomé Auténtico Malbec",b:"Bodega Colomé",r:"Valle Calchaquí, Salta",p:"Argentina",u:"Malbec"},
+{n:"Colomé Altura Máxima Malbec",b:"Bodega Colomé",r:"Valle Calchaquí, Salta",p:"Argentina",u:"Malbec"},
+{n:"Don David Malbec Reserve",b:"El Esteco",r:"Cafayate, Salta",p:"Argentina",u:"Malbec"},
+{n:"El Esteco Old Vines Torrontés",b:"El Esteco",r:"Cafayate, Salta",p:"Argentina",u:"Torrontés"},
+{n:"El Esteco Fincas Notables Malbec",b:"El Esteco",r:"Cafayate, Salta",p:"Argentina",u:"Malbec"},
+{n:"Etchart Privado Torrontés",b:"Bodegas Etchart",r:"Cafayate, Salta",p:"Argentina",u:"Torrontés"},
+{n:"Amalaya Malbec",b:"Bodega Amalaya",r:"Valle Calchaquí, Salta",p:"Argentina",u:"Blend tinto"},
+{n:"Piattelli Premium Malbec",b:"Piattelli Vineyards",r:"Cafayate, Salta",p:"Argentina",u:"Malbec"},
+/* ===== Patagonia ===== */
+{n:"Saurus Pinot Noir",b:"Familia Schroeder",r:"San Patricio del Chañar, Neuquén",p:"Argentina",u:"Pinot Noir"},
+{n:"Postales Fin del Mundo Malbec",b:"Bodega del Fin del Mundo",r:"Neuquén, Patagonia",p:"Argentina",u:"Malbec"},
+{n:"Fin del Mundo Special Blend",b:"Bodega del Fin del Mundo",r:"Neuquén, Patagonia",p:"Argentina",u:"Blend tinto"},
+{n:"A Lisa Malbec",b:"Bodega Noemía",r:"Valle Azul, Río Negro",p:"Argentina",u:"Malbec"},
+{n:"Noemía Malbec",b:"Bodega Noemía",r:"Valle Azul, Río Negro",p:"Argentina",u:"Malbec"},
+{n:"Chacra Barda Pinot Noir",b:"Bodega Chacra",r:"Río Negro, Patagonia",p:"Argentina",u:"Pinot Noir"},
+{n:"Chacra Cincuenta y Cinco Pinot Noir",b:"Bodega Chacra",r:"Río Negro, Patagonia",p:"Argentina",u:"Pinot Noir"},
+{n:"Humberto Canale Old Vineyard Riesling",b:"Humberto Canale",r:"Alto Valle, Río Negro",p:"Argentina",u:"Riesling"},
+{n:"Aniello 006 Riverside Estate Malbec",b:"Bodega Aniello",r:"Mainqué, Río Negro",p:"Argentina",u:"Malbec"},
+/* ===== Más Mendoza ===== */
+{n:"Mendel Malbec",b:"Mendel Wines",r:"Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Mendel Unus",b:"Mendel Wines",r:"Luján de Cuyo",p:"Argentina",u:"Blend tinto"},
+{n:"Mendel Finca Remota",b:"Mendel Wines",r:"Paraje Altamira, Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Nieto Senetiner Don Nicanor Malbec",b:"Nieto Senetiner",r:"Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Cadus Signature Malbec",b:"Nieto Senetiner",r:"Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Doña Paula Estate Malbec",b:"Doña Paula",r:"Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Doña Paula 1350 Blend",b:"Doña Paula",r:"Gualtallary, Valle de Uco",p:"Argentina",u:"Blend tinto"},
+{n:"Doña Paula Selección de Bodega Malbec",b:"Doña Paula",r:"Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Riccitelli The Apple Doesn't Fall Far From The Tree",b:"Matías Riccitelli",r:"Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Riccitelli Hey Malbec!",b:"Matías Riccitelli",r:"Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Riccitelli Old Vines From Patagonia Semillón",b:"Matías Riccitelli",r:"Río Negro, Patagonia",p:"Argentina",u:"Semillón"},
+{n:"Per Se La Craie",b:"Per Se",r:"Gualtallary, Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Per Se Iubileus",b:"Per Se",r:"Gualtallary, Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Passionate Wine Del Mono Tinto",b:"Passionate Wine (Matías Michelini)",r:"Valle de Uco",p:"Argentina",u:"Blend tinto"},
+{n:"Durigutti Malbec Clásico",b:"Durigutti Family Winemakers",r:"Las Compuertas, Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Proyecto Las Compuertas Malbec",b:"Durigutti Family Winemakers",r:"Las Compuertas, Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Riglos Gran Corte",b:"Bodega Riglos",r:"Gualtallary, Valle de Uco",p:"Argentina",u:"Blend tinto"},
+{n:"Monteviejo Lindaflor Malbec",b:"Bodega Monteviejo",r:"Vista Flores, Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Monteviejo Petite Fleur",b:"Bodega Monteviejo",r:"Vista Flores, Valle de Uco",p:"Argentina",u:"Blend tinto"},
+{n:"Clos de los Siete",b:"Clos de los Siete (Michel Rolland)",r:"Vista Flores, Valle de Uco",p:"Argentina",u:"Blend tinto"},
+{n:"DiamAndes de Uco Gran Reserva",b:"Bodega DiamAndes",r:"Vista Flores, Valle de Uco",p:"Argentina",u:"Blend tinto"},
+{n:"Cuvelier Los Andes Grand Vin",b:"Cuvelier Los Andes",r:"Vista Flores, Valle de Uco",p:"Argentina",u:"Blend tinto"},
+{n:"Cavas de Weinert",b:"Bodega Weinert",r:"Luján de Cuyo",p:"Argentina",u:"Blend tinto"},
+{n:"Weinert Carrascal",b:"Bodega Weinert",r:"Luján de Cuyo",p:"Argentina",u:"Blend tinto"},
+{n:"Montchenot",b:"Bodegas López",r:"Maipú, Mendoza",p:"Argentina",u:"Blend tinto"},
+{n:"Château Vieux",b:"Bodegas López",r:"Maipú, Mendoza",p:"Argentina",u:"Blend tinto"},
+{n:"Don Miguel Gascón Malbec",b:"Escorihuela Gascón",r:"Mendoza",p:"Argentina",u:"Malbec"},
+{n:"Escorihuela Gascón 1884 Malbec",b:"Escorihuela Gascón",r:"Mendoza",p:"Argentina",u:"Malbec"},
+{n:"Lagarde Guarda Malbec",b:"Bodega Lagarde",r:"Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Lagarde Primeras Viñas Malbec",b:"Bodega Lagarde",r:"Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Henry Gran Guarda N°1",b:"Bodega Lagarde",r:"Luján de Cuyo",p:"Argentina",u:"Blend tinto"},
+{n:"Fabre Montmayou Reservado Malbec",b:"Fabre Montmayou",r:"Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Benegas Estate Malbec",b:"Bodega Benegas",r:"Mendoza",p:"Argentina",u:"Malbec"},
+{n:"Carmelo Patti Malbec",b:"Carmelo Patti",r:"Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Chakana Estate Selection Malbec",b:"Chakana",r:"Agrelo, Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Antigal Uno Malbec",b:"Antigal",r:"Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Renacer Punto Final Malbec",b:"Bodega Renacer",r:"Perdriel, Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Decero Remolinos Vineyard Malbec",b:"Finca Decero",r:"Agrelo, Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Pulenta Estate Gran Malbec",b:"Pulenta Estate",r:"Agrelo, Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Pulenta La Flor Malbec",b:"Pulenta Estate",r:"Agrelo, Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Vistalba Corte A",b:"Bodega Vistalba",r:"Vistalba, Luján de Cuyo",p:"Argentina",u:"Blend tinto"},
+{n:"Vistalba Corte B",b:"Bodega Vistalba",r:"Vistalba, Luján de Cuyo",p:"Argentina",u:"Blend tinto"},
+{n:"Bressia Profundo",b:"Bodega Bressia",r:"Mendoza",p:"Argentina",u:"Blend tinto"},
+{n:"Bressia Conjuro",b:"Bodega Bressia",r:"Mendoza",p:"Argentina",u:"Blend tinto"},
+{n:"Tikal Amorío Malbec",b:"Tikal (Ernesto Catena)",r:"Mendoza",p:"Argentina",u:"Malbec"},
+{n:"Bemberg La Linterna Malbec",b:"Bemberg Estate Wines",r:"Gualtallary, Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Casarena Single Vineyard Agrelo Malbec",b:"Casarena",r:"Agrelo, Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Alpasión Grand Malbec",b:"Alpasión",r:"Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Manos Negras Stone Soil Malbec",b:"Manos Negras",r:"Paraje Altamira, Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Domaine Bousquet Reserve Malbec",b:"Domaine Bousquet",r:"Tupungato, Valle de Uco",p:"Argentina",u:"Malbec"},
+{n:"Trivento Golden Reserve Malbec",b:"Trivento",r:"Luján de Cuyo",p:"Argentina",u:"Malbec"},
+{n:"Trivento Amado Sur Malbec",b:"Trivento",r:"Mendoza",p:"Argentina",u:"Blend tinto"},
+{n:"Famiglia Bianchi Malbec",b:"Casa Bianchi",r:"San Rafael, Mendoza",p:"Argentina",u:"Malbec"},
+{n:"Enzo Bianchi Gran Corte",b:"Casa Bianchi",r:"San Rafael, Mendoza",p:"Argentina",u:"Blend tinto"},
+{n:"Alta Vista Alto",b:"Alta Vista",r:"Luján de Cuyo",p:"Argentina",u:"Blend tinto"},
+{n:"Alta Vista Vive Malbec",b:"Alta Vista",r:"Mendoza",p:"Argentina",u:"Malbec"},
+{n:"Pascual Toso Magdalena Toso",b:"Pascual Toso",r:"Barrancas, Maipú",p:"Argentina",u:"Blend tinto"},
+{n:"Finca Las Moras Barrel Select Malbec",b:"Finca Las Moras",r:"Valle de Tulum, San Juan",p:"Argentina",u:"Malbec"},
+{n:"Callia Alta Syrah",b:"Bodegas Callia",r:"Valle de Tulum, San Juan",p:"Argentina",u:"Syrah"},
+{n:"Graffigna Centenario Malbec",b:"Graffigna",r:"San Juan",p:"Argentina",u:"Malbec"},
+{n:"Cara Sur Criolla",b:"Cara Sur",r:"Barreal, San Juan",p:"Argentina",u:"Criolla"},
+{n:"Ver Sacrum Monastrell",b:"Ver Sacrum",r:"Valle de Uco",p:"Argentina",u:"Monastrell"},
+{n:"Malma Reserva de Familia Malbec",b:"Bodega Malma",r:"San Patricio del Chañar, Neuquén",p:"Argentina",u:"Malbec"},
+{n:"Argento Reserva Malbec",b:"Bodega Argento",r:"Mendoza",p:"Argentina",u:"Malbec"},
+/* ===== CHILE ===== */
+{n:"Casillero del Diablo Cabernet Sauvignon",b:"Concha y Toro",r:"Valle Central",p:"Chile",u:"Cabernet Sauvignon"},
+{n:"Marques de Casa Concha Cabernet Sauvignon",b:"Concha y Toro",r:"Valle del Maipo",p:"Chile",u:"Cabernet Sauvignon"},
+{n:"Don Melchor",b:"Concha y Toro",r:"Puente Alto, Valle del Maipo",p:"Chile",u:"Cabernet Sauvignon"},
+{n:"Almaviva",b:"Almaviva (Concha y Toro & Rothschild)",r:"Puente Alto, Valle del Maipo",p:"Chile",u:"Blend tinto"},
+{n:"Montes Alpha Cabernet Sauvignon",b:"Montes",r:"Valle de Colchagua",p:"Chile",u:"Cabernet Sauvignon"},
+{n:"Montes Purple Angel",b:"Montes",r:"Valle de Colchagua",p:"Chile",u:"Carménère"},
+{n:"Santa Rita 120 Cabernet Sauvignon",b:"Santa Rita",r:"Valle Central",p:"Chile",u:"Cabernet Sauvignon"},
+{n:"Santa Rita Casa Real",b:"Santa Rita",r:"Valle del Maipo",p:"Chile",u:"Cabernet Sauvignon"},
+{n:"Max Reserva Cabernet Sauvignon",b:"Errázuriz",r:"Valle de Aconcagua",p:"Chile",u:"Cabernet Sauvignon"},
+{n:"Don Maximiano Founder's Reserve",b:"Errázuriz",r:"Valle de Aconcagua",p:"Chile",u:"Blend tinto"},
+{n:"Seña",b:"Viña Seña",r:"Valle de Aconcagua",p:"Chile",u:"Blend tinto"},
+{n:"Clos Apalta",b:"Lapostolle",r:"Apalta, Valle de Colchagua",p:"Chile",u:"Blend tinto"},
+{n:"Cono Sur Bicicleta Pinot Noir",b:"Cono Sur",r:"Valle Central",p:"Chile",u:"Pinot Noir"},
+{n:"Cono Sur 20 Barrels Sauvignon Blanc",b:"Cono Sur",r:"Valle de Casablanca",p:"Chile",u:"Sauvignon Blanc"},
+{n:"1865 Selected Vineyards Carménère",b:"Viña San Pedro",r:"Valle del Maule",p:"Chile",u:"Carménère"},
+{n:"Viu Manent Secreto Malbec",b:"Viu Manent",r:"Valle de Colchagua",p:"Chile",u:"Malbec"},
+/* ===== URUGUAY ===== */
+{n:"Garzón Tannat Reserva",b:"Bodega Garzón",r:"Maldonado",p:"Uruguay",u:"Tannat"},
+{n:"Garzón Balasto",b:"Bodega Garzón",r:"Maldonado",p:"Uruguay",u:"Blend tinto"},
+{n:"Bouza Tannat A6",b:"Bodega Bouza",r:"Montevideo",p:"Uruguay",u:"Tannat"},
+/* ===== ESPAÑA ===== */
+{n:"Marqués de Riscal Reserva",b:"Marqués de Riscal",r:"Rioja",p:"España",u:"Tempranillo"},
+{n:"Marqués de Cáceres Crianza",b:"Marqués de Cáceres",r:"Rioja",p:"España",u:"Tempranillo"},
+{n:"Muga Reserva",b:"Bodegas Muga",r:"Rioja",p:"España",u:"Tempranillo"},
+{n:"La Rioja Alta Gran Reserva 904",b:"La Rioja Alta",r:"Rioja",p:"España",u:"Tempranillo"},
+{n:"Ramón Bilbao Crianza",b:"Ramón Bilbao",r:"Rioja",p:"España",u:"Tempranillo"},
+{n:"Vega Sicilia Único",b:"Vega Sicilia",r:"Ribera del Duero",p:"España",u:"Blend tinto"},
+{n:"Pesquera Crianza",b:"Tinto Pesquera",r:"Ribera del Duero",p:"España",u:"Tempranillo"},
+{n:"Emilio Moro",b:"Bodegas Emilio Moro",r:"Ribera del Duero",p:"España",u:"Tempranillo"},
+{n:"Protos Crianza",b:"Bodegas Protos",r:"Ribera del Duero",p:"España",u:"Tempranillo"},
+{n:"Sangre de Toro",b:"Familia Torres",r:"Cataluña",p:"España",u:"Garnacha"},
+{n:"Mas La Plana",b:"Familia Torres",r:"Penedès",p:"España",u:"Cabernet Sauvignon"},
+/* ===== FRANCIA ===== */
+{n:"Moët & Chandon Brut Impérial",b:"Moët & Chandon",r:"Champagne",p:"Francia",u:"Espumante"},
+{n:"Veuve Clicquot Yellow Label",b:"Veuve Clicquot",r:"Champagne",p:"Francia",u:"Espumante"},
+{n:"Dom Pérignon Vintage",b:"Dom Pérignon",r:"Champagne",p:"Francia",u:"Espumante"},
+{n:"Bollinger Special Cuvée",b:"Bollinger",r:"Champagne",p:"Francia",u:"Espumante"},
+{n:"Taittinger Brut Réserve",b:"Taittinger",r:"Champagne",p:"Francia",u:"Espumante"},
+{n:"Mouton Cadet Rouge",b:"Baron Philippe de Rothschild",r:"Burdeos",p:"Francia",u:"Blend tinto"},
+{n:"Château Margaux",b:"Château Margaux",r:"Margaux, Burdeos",p:"Francia",u:"Blend tinto"},
+{n:"Château Lafite Rothschild",b:"Château Lafite Rothschild",r:"Pauillac, Burdeos",p:"Francia",u:"Blend tinto"},
+{n:"Châteauneuf-du-Pape Télégramme",b:"Vieux Télégraphe",r:"Ródano",p:"Francia",u:"Garnacha"},
+{n:"Louis Jadot Bourgogne Pinot Noir",b:"Louis Jadot",r:"Borgoña",p:"Francia",u:"Pinot Noir"},
+/* ===== ITALIA ===== */
+{n:"Tignanello",b:"Antinori",r:"Toscana",p:"Italia",u:"Blend tinto"},
+{n:"Sassicaia",b:"Tenuta San Guido",r:"Bolgheri, Toscana",p:"Italia",u:"Blend tinto"},
+{n:"Ornellaia",b:"Tenuta dell'Ornellaia",r:"Bolgheri, Toscana",p:"Italia",u:"Blend tinto"},
+{n:"Chianti Classico Riserva Marchese Antinori",b:"Antinori",r:"Toscana",p:"Italia",u:"Sangiovese"},
+{n:"Brunello di Montalcino",b:"Castello Banfi",r:"Toscana",p:"Italia",u:"Sangiovese"},
+{n:"Barolo",b:"Fontanafredda",r:"Piamonte",p:"Italia",u:"Nebbiolo"},
+{n:"Amarone della Valpolicella Costasera",b:"Masi",r:"Véneto",p:"Italia",u:"Corvina"},
+{n:"Gaja Barbaresco",b:"Gaja",r:"Piamonte",p:"Italia",u:"Nebbiolo"},
+/* ===== PERÚ ===== */
+{n:"Intipalka Malbec",b:"Viñas Queirolo",r:"Valle de Ica",p:"Perú",u:"Malbec"},
+{n:"Intipalka N°1 Ensamblaje Tinto",b:"Viñas Queirolo",r:"Valle de Ica",p:"Perú",u:"Blend tinto"},
+{n:"Tacama Gran Tinto",b:"Viña Tacama",r:"Valle de Ica",p:"Perú",u:"Blend tinto"},
+{n:"Tacama Doña Ana",b:"Viña Tacama",r:"Valle de Ica",p:"Perú",u:"Blend tinto"},
+{n:"Tabernero Gran Tinto Reserva",b:"Bodegas Tabernero",r:"Valle de Chincha",p:"Perú",u:"Blend tinto"},
+/* ===== BOLIVIA ===== */
+{n:"Campos de Solana Trivarietal",b:"Campos de Solana",r:"Valle Central de Tarija",p:"Bolivia",u:"Blend tinto"},
+{n:"Campos de Solana Único Tannat",b:"Campos de Solana",r:"Valle Central de Tarija",p:"Bolivia",u:"Tannat"},
+{n:"Aranjuez Tannat Gran Reserva",b:"Bodega Aranjuez",r:"Valle Central de Tarija",p:"Bolivia",u:"Tannat"},
+{n:"Kohlberg Cabernet Sauvignon",b:"Bodegas Kohlberg",r:"Valle Central de Tarija",p:"Bolivia",u:"Cabernet Sauvignon"},
+{n:"La Concepción Cepas de Altura Syrah",b:"Bodega La Concepción",r:"Valle de la Concepción, Tarija",p:"Bolivia",u:"Syrah"},
+/* ===== USA ===== */
+{n:"Opus One",b:"Opus One Winery",r:"Napa Valley, California",p:"Estados Unidos",u:"Blend tinto"},
+{n:"Caymus Cabernet Sauvignon",b:"Caymus Vineyards",r:"Napa Valley, California",p:"Estados Unidos",u:"Cabernet Sauvignon"},
+{n:"Robert Mondavi Napa Cabernet Sauvignon",b:"Robert Mondavi Winery",r:"Napa Valley, California",p:"Estados Unidos",u:"Cabernet Sauvignon"}
+];
+
+</script>
+
+<script>
 /* =========================================================
-   CONFIGURACIÓN — completar con los datos de TU proyecto Supabase
-   (Project Settings > API en supabase.com)
+   CONFIG SUPABASE
    ========================================================= */
 const SUPABASE_URL = "https://uxyaaahmmkpprxndvcby.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_53O716mUVbgTiDloqXW_Mg_QM2I-cjn";
-
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUser = null;
 let currentTab = "tried";
-let currentWine = null; // vino abierto en el modal de detalle
+let currentWine = null;
+let allWines = [];           // vinos del tab actual
+let ratingsByWine = {};      // wine_id -> [scores]
+let likesByWine = {};        // wine_id -> {count, mine}
+let criticsByWine = {};      // wine_id -> [scores]
+let myStars = 0;             // selección actual del input de estrellas
+let hasExtraCols = true;     // country/grape en la tabla wines
 
 const $ = (id) => document.getElementById(id);
+const norm = (s) => (s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
 
 function toast(msg){
   const t = $("toast");
   t.textContent = msg;
   t.classList.remove("hidden");
-  setTimeout(()=> t.classList.add("hidden"), 2500);
+  clearTimeout(t._h);
+  t._h = setTimeout(()=> t.classList.add("hidden"), 2600);
+}
+
+/* estrellas: score guardado 0-100 → estrellas = score/20 */
+const toStars = (score) => Math.round((Number(score||0)/20)*2)/2;
+function starsHTML(stars, size){
+  const pct = Math.max(0, Math.min(100, (stars/5)*100));
+  return `<span class="stars" ${size?`style="font-size:${size}px"`:""}>★★★★★<span class="fill" style="width:${pct}%">★★★★★</span></span>`;
 }
 
 /* ---------------- AUTH ---------------- */
@@ -287,13 +731,9 @@ $("sendLinkBtn").onclick = async () => {
   const email = $("emailInput").value.trim();
   if(!email){ $("loginMsg").textContent = "Escribí tu email primero."; return; }
   $("loginMsg").textContent = "Enviando...";
-  const { error } = await sb.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: window.location.href }
-  });
-  $("loginMsg").textContent = error ? ("Error: " + error.message) : "Listo, revisá tu email y tocá el link (puede tardar 1-2 min).";
+  const { error } = await sb.auth.signInWithOtp({ email, options:{ emailRedirectTo: window.location.href } });
+  $("loginMsg").textContent = error ? ("Error: " + error.message) : "Listo, revisá tu email y tocá el link (puede tardar 1-2 min). 💌";
 };
-
 $("logoutBtn").onclick = async () => { await sb.auth.signOut(); location.reload(); };
 
 sb.auth.onAuthStateChange((_event, session) => {
@@ -302,80 +742,193 @@ sb.auth.onAuthStateChange((_event, session) => {
     ensureProfile();
     $("loginScreen").classList.add("hidden");
     $("app").classList.remove("hidden");
-    $("userEmail").textContent = currentUser.email;
+    $("userEmail").textContent = currentUser.email.split("@")[0];
     loadWines();
   } else {
     $("loginScreen").classList.remove("hidden");
     $("app").classList.add("hidden");
   }
 });
-
 async function ensureProfile(){
   await sb.from("profiles").upsert({ id: currentUser.id, display_name: currentUser.email.split("@")[0] });
 }
 
 /* ---------------- TABS ---------------- */
-$("tabTried").onclick = () => switchTab("tried");
-$("tabWishlist").onclick = () => switchTab("wishlist");
 function switchTab(tab){
   currentTab = tab;
-  $("tabTried").classList.toggle("active", tab === "tried");
-  $("tabWishlist").classList.toggle("active", tab === "wishlist");
+  ["tabTried","navTried"].forEach(id => $(id).classList.toggle("active", tab==="tried"));
+  ["tabWishlist","navWishlist"].forEach(id => $(id).classList.toggle("active", tab==="wishlist"));
   $("recField").classList.toggle("hidden", tab !== "wishlist");
-  $("addModalTitle").textContent = tab === "wishlist" ? "Agregar a la lista de deseos" : "Agregar vino que tomamos";
+  $("addModalTitle").textContent = tab === "wishlist" ? "Agregar a “Para probar”" : "Agregar vino que tomamos";
   loadWines();
 }
+$("tabTried").onclick = $("navTried").onclick = () => switchTab("tried");
+$("tabWishlist").onclick = $("navWishlist").onclick = () => switchTab("wishlist");
+$("searchInput").oninput = () => renderList();
 
-/* ---------------- CARGAR VINOS ---------------- */
+/* ---------------- CARGA DE DATOS (sin N+1) ---------------- */
 async function loadWines(){
-  const { data: wines, error } = await sb
-    .from("wines")
-    .select("*")
-    .eq("status", currentTab)
-    .order("created_at", { ascending: false });
-
-  const grid = $("grid");
-  const empty = $("emptyState");
-  grid.innerHTML = "";
-
+  const { data: wines, error } = await sb.from("wines").select("*")
+    .eq("status", currentTab).order("created_at", { ascending:false });
   if (error){ toast("Error cargando vinos: " + error.message); return; }
+  allWines = wines || [];
 
-  if (!wines || wines.length === 0){
+  const ids = allWines.map(w => w.id);
+  ratingsByWine = {}; likesByWine = {}; criticsByWine = {};
+  if (ids.length){
+    const [r1, r2, r3] = await Promise.all([
+      sb.from("group_ratings").select("wine_id, score").in("wine_id", ids),
+      sb.from("wine_likes").select("wine_id, user_id").in("wine_id", ids),
+      sb.from("critic_scores").select("wine_id, score").in("wine_id", ids),
+    ]);
+    (r1.data||[]).forEach(r => (ratingsByWine[r.wine_id] ||= []).push(Number(r.score||0)));
+    (r2.data||[]).forEach(l => {
+      const o = (likesByWine[l.wine_id] ||= {count:0, mine:false});
+      o.count++; if (l.user_id === currentUser.id) o.mine = true;
+    });
+    (r3.data||[]).forEach(c => (criticsByWine[c.wine_id] ||= []).push(Number(c.score||0)));
+    if (r2.error) console.warn("wine_likes:", r2.error.message); // tabla aún no creada
+  }
+  renderList();
+}
+
+function avg(arr){ return arr && arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : null; }
+
+function renderList(){
+  const q = norm($("searchInput").value.trim());
+  const list = $("list"); const empty = $("emptyState");
+  const wines = allWines.filter(w => !q || norm([w.name,w.winery,w.region,w.country,w.grape].join(" ")).includes(q));
+  list.innerHTML = "";
+  $("countLine").textContent = wines.length ? `${wines.length} vino${wines.length>1?"s":""}` : "";
+
+  if (!wines.length){
     empty.classList.remove("hidden");
-    empty.textContent = currentTab === "tried"
-      ? "Todavía no marcaron ningún vino como tomado. Tocá '+ Agregar vino'."
-      : "Todavía no hay vinos en la lista de deseos.";
+    empty.innerHTML = q
+      ? `<div class="big">🔍</div>No encontramos nada con “${$("searchInput").value}”.`
+      : (currentTab === "tried"
+        ? `<div class="big">🍷</div>Todavía no cargaron ningún vino.<br>Tocá el <b>+</b> para subir el primero.`
+        : `<div class="big">🔖</div>Todavía no hay vinos en “Para probar”.`);
     return;
   }
   empty.classList.add("hidden");
 
-  for (const wine of wines){
+  for (const w of wines){
+    const scores = ratingsByWine[w.id] || [];
+    const stars = avg(scores) != null ? toStars(avg(scores)) : null;
+    const like = likesByWine[w.id] || {count:0, mine:false};
+    const criticAvg = avg(criticsByWine[w.id]);
+
     const card = document.createElement("div");
-    card.className = "card";
-    card.onclick = () => openDetail(wine);
-
-    let badges = "";
-    if (currentTab === "tried"){
-      const { data: ratings } = await sb.from("group_ratings").select("score").eq("wine_id", wine.id);
-      if (ratings && ratings.length){
-        const avg = (ratings.reduce((a,b)=>a+Number(b.score||0),0) / ratings.length).toFixed(0);
-        badges += `<span class="badge group">Grupo: ${avg}</span>`;
-      }
-      const { data: critics } = await sb.from("critic_scores").select("critic_name, score").eq("wine_id", wine.id).limit(2);
-      (critics||[]).forEach(c => badges += `<span class="badge">${c.critic_name}: ${c.score ?? "-"}</span>`);
-    }
-
+    card.className = "wine-card";
     card.innerHTML = `
-      <div class="photo">${wine.photo_url ? `<img src="${wine.photo_url}">` : "🍷"}</div>
-      <div class="info">
-        <h3>${wine.name}</h3>
-        <div class="sub">${[wine.winery, wine.vintage].filter(Boolean).join(" · ")}</div>
-        ${wine.status === "wishlist" && wine.recommended_by ? `<div class="sub">💬 ${wine.recommended_by}</div>` : ""}
-        <div class="badge-row">${badges}</div>
+      <div class="photo">${w.photo_url ? `<img src="${w.photo_url}" loading="lazy">` : "🍷"}</div>
+      <div class="body">
+        <div class="winery">${w.winery || "&nbsp;"}</div>
+        <h3>${w.name}${w.vintage ? ` <span style="font-weight:500;color:var(--ink-soft)">${w.vintage}</span>` : ""}</h3>
+        <div class="meta">${[w.region, w.country].filter(Boolean).join(" · ") || ""}</div>
+        <div class="rating-line">
+          ${stars != null ? `<span class="avg-num">${stars.toFixed(1)}</span>${starsHTML(stars)}<span class="rate-count">(${scores.length})</span>` : `<span class="rate-count">Sin puntajes todavía</span>`}
+        </div>
+        <div class="card-foot">
+          ${criticAvg != null ? `<span class="chip critic">Críticos ${criticAvg.toFixed(0)}/100</span>` : ""}
+          ${w.status === "wishlist" && w.recommended_by ? `<span class="chip">💬 ${w.recommended_by}</span>` : ""}
+          <button class="like-btn ${like.mine ? "liked":""}" data-like="${w.id}">
+            <span class="heart">${like.mine ? "♥" : "♡"}</span>${like.count || ""}
+          </button>
+        </div>
       </div>`;
-    grid.appendChild(card);
+    card.onclick = (e) => {
+      if (e.target.closest("[data-like]")) return;
+      openDetail(w);
+    };
+    card.querySelector("[data-like]").onclick = (e) => { e.stopPropagation(); toggleLike(w.id); };
+    list.appendChild(card);
   }
 }
+
+/* ---------------- LIKES ---------------- */
+async function toggleLike(wineId){
+  const like = likesByWine[wineId] || {count:0, mine:false};
+  if (like.mine){
+    const { error } = await sb.from("wine_likes").delete().eq("wine_id", wineId).eq("user_id", currentUser.id);
+    if (error){ toast("Error: " + error.message); return; }
+    like.count = Math.max(0, like.count-1); like.mine = false;
+  } else {
+    const { error } = await sb.from("wine_likes").insert({ wine_id: wineId, user_id: currentUser.id });
+    if (error){
+      toast(error.message.includes("does not exist") || error.message.includes("schema")
+        ? "Falta crear la tabla de likes en Supabase (mirá las instrucciones)." : "Error: " + error.message);
+      return;
+    }
+    like.count++; like.mine = true;
+  }
+  likesByWine[wineId] = like;
+  renderList();
+  if (currentWine && currentWine.id === wineId) renderLikeFloat();
+}
+
+/* ---------------- AUTOCOMPLETE ---------------- */
+const nameInput = $("f_name");
+nameInput.addEventListener("input", () => {
+  const q = norm(nameInput.value.trim());
+  const box = $("suggestBox");
+  if (q.length < 2){ box.classList.add("hidden"); return; }
+
+  const seen = new Set();
+  const results = [];
+  // 1) vinos ya cargados por el grupo
+  for (const w of allWines){
+    if (norm(w.name + " " + (w.winery||"")).includes(q) && !seen.has(norm(w.name))){
+      seen.add(norm(w.name));
+      results.push({ n:w.name, b:w.winery, r:w.region, p:w.country, u:w.grape, src:"nuestro" });
+    }
+  }
+  // 2) catálogo
+  for (const c of WINE_CATALOG){
+    if (results.length >= 8) break;
+    if ((norm(c.n).includes(q) || norm(c.b).includes(q)) && !seen.has(norm(c.n))){
+      seen.add(norm(c.n));
+      results.push({...c, src:"catálogo"});
+    }
+  }
+  if (!results.length){ box.classList.add("hidden"); return; }
+  box.innerHTML = results.map((r,i) =>
+    `<div class="opt" data-i="${i}"><span class="src">${r.src}</span><b>${r.n}</b><span>${[r.b,r.r,r.p].filter(Boolean).join(" · ")}</span></div>`
+  ).join("");
+  box.classList.remove("hidden");
+  box.querySelectorAll(".opt").forEach(opt => {
+    opt.onclick = () => {
+      const r = results[Number(opt.dataset.i)];
+      nameInput.value = r.n;
+      if (r.b) $("f_winery").value = r.b;
+      if (r.r) $("f_region").value = r.r;
+      if (r.p) $("f_country").value = r.p;
+      if (r.u) $("f_grape").value = r.u;
+      box.classList.add("hidden");
+      $("f_vintage").focus();  // lo único que falta completar
+    };
+  });
+});
+document.addEventListener("click", (e) => {
+  if (!e.target.closest("#f_name") && !e.target.closest("#suggestBox")) $("suggestBox").classList.add("hidden");
+});
+
+/* ---------------- FOTO: cámara o galería ---------------- */
+let photoFile = null;
+$("cameraBtn").onclick = () => $("f_photo_camera").click();
+$("galleryBtn").onclick = () => $("f_photo_gallery").click();
+function handlePhoto(input){
+  input.addEventListener("change", () => {
+    const f = input.files[0];
+    if (!f) return;
+    photoFile = f;
+    const url = URL.createObjectURL(f);
+    $("photoPreview").src = url;
+    $("photoPreview").classList.remove("hidden");
+  });
+}
+handlePhoto($("f_photo_camera"));
+handlePhoto($("f_photo_gallery"));
 
 /* ---------------- AGREGAR VINO ---------------- */
 $("addBtn").onclick = () => $("addOverlay").classList.remove("hidden");
@@ -386,66 +939,157 @@ document.querySelectorAll("[data-close]").forEach(btn => {
 $("saveWineBtn").onclick = async () => {
   const name = $("f_name").value.trim();
   if (!name){ toast("Poné al menos el nombre del vino."); return; }
+  $("saveWineBtn").textContent = "Guardando...";
 
   let photo_url = null;
-  const file = $("f_photo").files[0];
-  if (file){
-    const path = `${Date.now()}_${file.name}`;
-    const { error: upErr } = await sb.storage.from("wine-photos").upload(path, file);
+  if (photoFile){
+    const path = `${Date.now()}_${photoFile.name.replace(/[^a-zA-Z0-9._-]/g,"_")}`;
+    const { error: upErr } = await sb.storage.from("wine-photos").upload(path, photoFile);
     if (upErr){ toast("Error subiendo la foto: " + upErr.message); }
-    else {
-      const { data } = sb.storage.from("wine-photos").getPublicUrl(path);
-      photo_url = data.publicUrl;
-    }
+    else photo_url = sb.storage.from("wine-photos").getPublicUrl(path).data.publicUrl;
   }
 
-  const { error } = await sb.from("wines").insert({
+  const row = {
     name,
     winery: $("f_winery").value.trim(),
     vintage: $("f_vintage").value.trim(),
     region: $("f_region").value.trim(),
     recommended_by: $("f_recommended").value.trim(),
-    photo_url,
-    status: currentTab,
-    added_by: currentUser.id
-  });
+    photo_url, status: currentTab, added_by: currentUser.id
+  };
+  if (hasExtraCols){ row.country = $("f_country").value.trim(); row.grape = $("f_grape").value.trim(); }
 
+  let { error } = await sb.from("wines").insert(row);
+  if (error && /country|grape/.test(error.message)){
+    // columnas nuevas aún no creadas → reintenta sin ellas
+    hasExtraCols = false;
+    delete row.country; delete row.grape;
+    ({ error } = await sb.from("wines").insert(row));
+  }
+  $("saveWineBtn").textContent = "Guardar 🍷";
   if (error){ toast("Error: " + error.message); return; }
 
-  ["f_name","f_winery","f_vintage","f_region","f_recommended"].forEach(id => $(id).value = "");
-  $("f_photo").value = "";
+  ["f_name","f_winery","f_vintage","f_region","f_country","f_grape","f_recommended"].forEach(id => $(id).value = "");
+  photoFile = null;
+  $("photoPreview").classList.add("hidden");
+  $("f_photo_camera").value = ""; $("f_photo_gallery").value = "";
   $("addOverlay").classList.add("hidden");
   toast("Vino agregado 🍷");
   loadWines();
 };
 
-/* ---------------- DETALLE DE VINO ---------------- */
+/* ---------------- DETALLE ---------------- */
 async function openDetail(wine){
   currentWine = wine;
-  $("d_name").textContent = wine.name;
-  $("d_sub").textContent = [wine.winery, wine.vintage, wine.region].filter(Boolean).join(" · ");
+  $("d_winery").textContent = wine.winery || "";
+  $("d_name").textContent = wine.name + (wine.vintage ? " " + wine.vintage : "");
+  $("d_meta").textContent = [wine.region, wine.country, wine.grape].filter(Boolean).join(" · ");
   if (wine.photo_url){
     $("d_photo").src = wine.photo_url;
     $("d_photo").classList.remove("hidden");
+    $("d_emoji").classList.add("hidden");
   } else {
     $("d_photo").classList.add("hidden");
+    $("d_emoji").classList.remove("hidden");
   }
-  await renderCritics();
-  await renderRatings();
+  $("markTriedBtn").classList.toggle("hidden", wine.status !== "wishlist");
+
+  const gq = encodeURIComponent(`${wine.name} ${wine.winery||""} ${wine.vintage||""}`.trim());
+  $("criticSearchLinks").innerHTML =
+    `Buscar puntajes: <a href="https://www.vivino.com/search/wines?q=${gq}" target="_blank">Vivino</a> · ` +
+    `<a href="https://www.google.com/search?q=${gq}+puntaje+cr%C3%ADtico" target="_blank">Google</a>`;
+
+  myStars = 0; setStarInput(0);
+  $("f_myComment").value = "";
+  renderLikeFloat();
   $("detailOverlay").classList.remove("hidden");
+  await Promise.all([renderRatings(), renderCritics()]);
+}
+
+function renderLikeFloat(){
+  const like = likesByWine[currentWine.id] || {count:0, mine:false};
+  const b = $("d_likeBtn");
+  b.classList.toggle("liked", like.mine);
+  b.querySelector(".heart").textContent = like.mine ? "♥" : "♡";
+  $("d_likeCount").textContent = like.count;
+}
+$("d_likeBtn").onclick = () => toggleLike(currentWine.id);
+
+$("markTriedBtn").onclick = async () => {
+  const { error } = await sb.from("wines").update({ status:"tried" }).eq("id", currentWine.id);
+  if (error){ toast("Error: " + error.message); return; }
+  toast("¡Pasado a Tomamos! 🍷");
+  $("detailOverlay").classList.add("hidden");
+  loadWines();
+};
+
+/* input de estrellas con medias */
+const starEls = Array.from($("starInput").children);
+function setStarInput(v){
+  myStars = v;
+  starEls.forEach((el,i) => {
+    const fill = el.querySelector(".full");
+    const n = i+1;
+    fill.style.width = v >= n ? "100%" : (v >= n-0.5 ? "50%" : "0%");
+  });
+  $("starValue").textContent = v ? `${v} de 5 estrellas` : "Tocá las estrellas (medias incluidas)";
+}
+starEls.forEach((el,i) => {
+  el.addEventListener("click", (e) => {
+    const rect = el.getBoundingClientRect();
+    const half = (e.clientX - rect.left) < rect.width/2;
+    setStarInput(i + (half ? 0.5 : 1));
+  });
+});
+
+$("addRatingBtn").onclick = async () => {
+  if (!myStars){ toast("Elegí cuántas estrellas primero ⭐"); return; }
+  const { error } = await sb.from("group_ratings").upsert({
+    wine_id: currentWine.id,
+    user_id: currentUser.id,
+    score: Math.round(myStars*20),         // guardamos 0-100 (compatible con lo viejo)
+    comment: $("f_myComment").value.trim()
+  }, { onConflict: "wine_id,user_id" });
+  if (error){ toast("Error: " + error.message); return; }
+  toast("¡Guardado! 🙌");
+  await renderRatings();
+  loadWines();
+};
+
+async function renderRatings(){
+  const { data } = await sb.from("group_ratings")
+    .select("score, comment, user_id, profiles(display_name)")
+    .eq("wine_id", currentWine.id).order("created_at", { ascending:false });
+  const list = $("ratingList"); list.innerHTML = "";
+  const rows = data || [];
+  rows.forEach(r => {
+    const s = toStars(r.score);
+    const div = document.createElement("div");
+    div.className = "comment";
+    div.innerHTML = `<div class="head"><span class="who">${(r.profiles && r.profiles.display_name) || "alguien"}</span>${starsHTML(s,13)}</div>${r.comment || ""}`;
+    list.appendChild(div);
+    if (r.user_id === currentUser.id && !myStars){ setStarInput(s); $("f_myComment").value = r.comment || ""; }
+  });
+  if (!rows.length) list.innerHTML = `<div class="helper">Todavía nadie opinó. ¡Sé la primera! ⭐</div>`;
+  const a = avg(rows.map(r => Number(r.score||0)));
+  $("d_avgStars").textContent = a != null ? toStars(a).toFixed(1) : "—";
+  $("d_ratingCount").textContent = rows.length;
 }
 
 async function renderCritics(){
-  const { data } = await sb.from("critic_scores").select("*").eq("wine_id", currentWine.id).order("created_at", { ascending:false });
-  const list = $("criticList");
-  list.innerHTML = "";
-  (data||[]).forEach(c => {
+  const { data } = await sb.from("critic_scores").select("*")
+    .eq("wine_id", currentWine.id).order("created_at", { ascending:false });
+  const list = $("criticList"); list.innerHTML = "";
+  const rows = data || [];
+  rows.forEach(c => {
     const row = document.createElement("div");
     row.className = "critic-row";
-    row.innerHTML = `<span>${c.critic_name} ${c.source_url ? `· <a href="${c.source_url}" target="_blank">fuente</a>` : ""}</span><span class="score-pill">${c.score ?? "-"}</span>`;
+    row.innerHTML = `<span>${c.critic_name}${c.source_url ? ` · <a href="${c.source_url}" target="_blank">fuente</a>` : ""}</span><span class="score-pill">${c.score ?? "—"}</span>`;
     list.appendChild(row);
   });
-  if (!data || data.length === 0) list.innerHTML = `<div class="sub" style="opacity:0.7;font-size:13px;">Todavía no hay puntajes de críticos cargados.</div>`;
+  if (!rows.length) list.innerHTML = `<div class="helper">Todavía no hay puntajes de críticos cargados.</div>`;
+  const a = avg(rows.map(c => Number(c.score||0)).filter(n => n>0));
+  $("d_criticAvg").textContent = a != null ? a.toFixed(0) : "—";
 }
 
 $("addCriticBtn").onclick = async () => {
@@ -459,40 +1103,8 @@ $("addCriticBtn").onclick = async () => {
   });
   if (error){ toast("Error: " + error.message); return; }
   $("f_criticScore").value = ""; $("f_criticSource").value = "";
-  renderCritics();
+  await renderCritics();
   loadWines();
-};
-
-async function renderRatings(){
-  const { data } = await sb
-    .from("group_ratings")
-    .select("score, comment, user_id, profiles(display_name)")
-    .eq("wine_id", currentWine.id)
-    .order("created_at", { ascending:false });
-  const list = $("ratingList");
-  list.innerHTML = "";
-  (data||[]).forEach(r => {
-    const row = document.createElement("div");
-    row.className = "comment";
-    row.innerHTML = `<b>${(r.profiles && r.profiles.display_name) || "alguien"} · ${r.score ?? "-"}/100</b><br>${r.comment || ""}`;
-    list.appendChild(row);
-  });
-  if (!data || data.length === 0) list.innerHTML = `<div class="sub" style="opacity:0.7;font-size:13px;">Todavía nadie puso puntaje. ¡Sé la primera!</div>`;
-}
-
-$("addRatingBtn").onclick = async () => {
-  const score = $("f_myScore").value;
-  const { error } = await sb.from("group_ratings").upsert({
-    wine_id: currentWine.id,
-    user_id: currentUser.id,
-    score: score ? Number(score) : null,
-    comment: $("f_myComment").value.trim()
-  }, { onConflict: "wine_id,user_id" });
-  if (error){ toast("Error: " + error.message); return; }
-  $("f_myScore").value = ""; $("f_myComment").value = "";
-  renderRatings();
-  loadWines();
-  toast("Guardado 🙌");
 };
 </script>
 </body>
