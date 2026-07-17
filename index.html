@@ -334,6 +334,23 @@
   .svc.c{background:#dcf5e3;} .svc.h{background:#ffe0d1;}
   .bodega-card .web{display:inline-block; margin-top:10px; font-size:12px; font-weight:700; color:var(--purple);}
 
+  /* ============ PERFIL DE SABOR ============ */
+  .taste-row{
+    display:grid; grid-template-columns:76px 1fr 76px; align-items:center; gap:10px;
+    margin-bottom:13px; font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.02em;
+  }
+  .taste-row .rlab{text-align:right;}
+  .taste-track{position:relative; height:12px; background:#fff; border:2px solid var(--ink); border-radius:99px;}
+  .taste-pill{position:absolute; top:1px; height:6px; width:20%; border-radius:99px; box-shadow:1px 1px 0 rgba(17,17,17,.5);}
+  .taste-slider{
+    display:grid; grid-template-columns:76px 1fr 76px; align-items:center; gap:10px;
+    margin-bottom:8px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.02em;
+    color:var(--ink-soft);
+  }
+  .taste-slider .rlab{text-align:right;}
+  .taste-slider input[type=range]{width:100%; height:22px; cursor:pointer;}
+  .taste-slider.touched{color:var(--ink);}
+
   .toast{
     position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:var(--ink);
     color:#efeada; padding:12px 22px; border-radius:999px; font-size:13px; font-weight:700; z-index:300;
@@ -433,6 +450,14 @@
         <input id="f_price" type="number" inputmode="decimal" min="0" step="0.5" placeholder="25" />
       </div>
     </div>
+    <div class="field">
+      <label>Crianza / madera</label>
+      <select id="f_oak">
+        <option value="">No sé / sin dato</option>
+        <option>Crianza / Barricado</option>
+        <option>Sin madera</option>
+      </select>
+    </div>
     <div class="field hidden" id="recField">
       <label>¿Quién lo recomendó / dónde lo vieron?</label>
       <input id="f_recommended" type="text" placeholder="Ej: nos lo recomendó Sole" />
@@ -475,11 +500,15 @@
 
     <button class="btn ghost hidden" id="markTriedBtn" style="margin-top:8px;">✅ ¡Lo tomamos! Pasar a “Tomamos”</button>
 
+    <div class="section-title">¿A qué sabe?</div>
+    <div id="tasteBoard"></div>
+
     <div class="section-title">Tu puntaje</div>
     <div class="star-input" id="starInput">
       <span data-i="1">★<span class="full">★</span></span><span data-i="2">★<span class="full">★</span></span><span data-i="3">★<span class="full">★</span></span><span data-i="4">★<span class="full">★</span></span><span data-i="5">★<span class="full">★</span></span>
     </div>
     <div class="star-input-value" id="starValue">Tocá las estrellas (medias incluidas)</div>
+    <div id="tasteSliders" style="margin:14px 0 4px;"></div>
     <div class="field">
       <input id="f_myComment" type="text" placeholder="¿Qué te pareció? Aromas, en qué momento lo tomarías..." />
     </div>
@@ -799,6 +828,16 @@ let activeSvc = new Set();   // filtros activos en tab Bodegas
    s: v=visita, d=degustación, a=almuerzo, c=cena, h=hospedaje
    ========================================================= */
 const SVC_LABELS = {v:"Visita", d:"Degustación", a:"Almuerzo", c:"Cena", h:"Hospedaje"};
+
+/* Ejes del perfil de sabor (0-100), colores de la paleta de arcos del login */
+const TASTE_AXES = [
+  {k:"body",      l:"Ligero",   r:"Potente", c:"#ff2ea6"},
+  {k:"tannin",    l:"Suave",    r:"Tánico",  c:"#ff8a1e"},
+  {k:"sweetness", l:"Seco",     r:"Dulce",   c:"#7b5cff"},
+  {k:"acidity",   l:"Blando",   r:"Ácido",   c:"#22c55e"},
+  {k:"oak_fruit", l:"Maderoso", r:"Frutado", c:"#ffb400"}
+];
+let hasTasteCols = true;     // columnas de sabor en group_ratings
 const BODEGAS = [
 {n:"Zuccardi Valle de Uco",z:"Paraje Altamira, Valle de Uco",s:["v","d","a","c"],w:"https://www.familiazuccardi.com",note:"Piedra Infinita Cocina: almuerzo todos los días; cena jueves a sábado. Elegida varias veces mejor bodega del mundo para visitar."},
 {n:"Catena Zapata",z:"Agrelo, Luján de Cuyo",s:["v","d","a"],w:"https://www.catenawines.com",note:"La pirámide maya icónica. Visitas y catas premium + restaurante Angélica Cocina Maestra."},
@@ -819,7 +858,22 @@ const BODEGAS = [
 {n:"Casa de Uco",z:"Los Chacayes, Tunuyán",s:["v","d","a","c","h"],w:"https://www.casadeuco.com",note:"Hotel de diseño entre viñedos con cocina de estación e ingredientes de la finca."},
 {n:"The Vines Resort & Spa",z:"Los Chacayes, Tunuyán",s:["v","d","a","c","h"],w:"https://www.vinesresortandspa.com",note:"Villas de lujo + Siete Fuegos de Francis Mallmann, asado a fuego abierto."},
 {n:"Rosell Boher Lodge",z:"Russell, Maipú",s:["d","a","c","h"],w:"https://www.rosellboherlodge.com",note:"Lodge boutique de la casa de espumantes. Restaurante de pasos con maridaje."},
-{n:"Domaine Bousquet",z:"Tupungato, Valle de Uco",s:["v","d","a","h"],w:"https://www.domainebousquet.com",note:"Vinos orgánicos + Gaia Restó y lodge. Desayunos de campo y menús veggie-friendly."}
+{n:"Domaine Bousquet",z:"Tupungato, Valle de Uco",s:["v","d","a","h"],w:"https://www.domainebousquet.com",note:"Vinos orgánicos + Gaia Restó y lodge. Desayunos de campo y menús veggie-friendly."},
+{n:"Bodega Los Toneles",z:"Guaymallén (ciudad)",s:["v","d","a","c"],w:"https://www.bodegalostoneles.com",note:"Bodega patrimonial en plena ciudad. Restaurante Abrasado, especializado en carnes maduradas."},
+{n:"Séptima",z:"Agrelo, Luján de Cuyo",s:["v","d","a"],w:"https://www.bodegaseptima.com",note:"Muros de piedra estilo pirca y restaurante María con vista a los Andes."},
+{n:"Atamisque",z:"San José, Tupungato",s:["v","d","a"],w:"https://www.atamisque.com",note:"Rincón Atamisque: famoso por la trucha de su propio criadero. Parque y golf."},
+{n:"Monteviejo",z:"Vista Flores, Tunuyán",s:["v","d","a"],w:"https://www.monteviejo.com.ar",note:"Parte de Clos de los Siete. Terraza panorámica y ciclos de arte y música."},
+{n:"Piedra Negra (François Lurton)",z:"Los Chacayes, Tunuyán",s:["v","d","a"],w:"https://www.bodegapiedranegra.com",note:"Bodega gravitacional del bordelés François Lurton en el corazón de Los Chacayes."},
+{n:"Bodega La Azul",z:"Agua Amarga, Tupungato",s:["v","d","a"],w:"https://www.bodegalaazul.com",note:"Chica y familiar, uno de los almuerzos criollos más queridos del Valle de Uco."},
+{n:"Gimenez Riili",z:"Vista Flores, Tunuyán",s:["v","d","a","h"],w:"https://www.gimenezriili.com",note:"Posada The Vines of Mendoza + menú de pasos. Trato familiar, muy buena relación precio-calidad."},
+{n:"Tempus Alba",z:"Coquimbito, Maipú",s:["v","d","a"],w:"https://www.tempusalba.com",note:"Terraza sobre los viñedos ideal para el circuito en bici por Maipú."},
+{n:"Clos de Chacras",z:"Chacras de Coria, Luján de Cuyo",s:["v","d","a"],w:"https://www.closdechacras.com.ar",note:"Bodega boutique centenaria a metros de la plaza de Chacras. Restaurante La Cava."},
+{n:"Casa del Visitante (Santa Julia)",z:"Maipú",s:["v","d","a"],w:"https://www.casadelvisitante.com.ar",note:"El polo de enoturismo de Familia Zuccardi en Maipú: cocina regional y experiencias con la familia."},
+{n:"Terrazas de los Andes",z:"Perdriel, Luján de Cuyo",s:["v","d","a"],w:"https://www.terrazasdelosandes.com",note:"Casona de 1898 restaurada. Almuerzos de pasos con maridaje de altura."},
+{n:"Chandon Argentina",z:"Agrelo, Luján de Cuyo",s:["v","d"],w:"https://www.chandon.com.ar",note:"La casa de espumantes más clásica para visitar. Experiencias con burbujas y música."},
+{n:"Bodega Melipal",z:"Agrelo, Luján de Cuyo",s:["v","d","a"],w:"https://www.bodegamelipal.com",note:"Restaurante vidriado frente al viñedo de Malbec. Menú de pasos con maridaje."},
+{n:"Casarena",z:"Agrelo, Luján de Cuyo",s:["v","d","a"],w:"https://www.casarena.com",note:"Bodega de 1937 recuperada, catas de single vineyards y almuerzo entre tanques."},
+{n:"Durigutti Family Winemakers",z:"Las Compuertas, Luján de Cuyo",s:["v","d","a","h"],w:"https://www.durigutti.com",note:"Proyecto 5 Suelos con almuerzos de campo y casitas entre viñedos (Casa Durigutti)."}
 ];
 
 const $ = (id) => document.getElementById(id);
@@ -1005,6 +1059,7 @@ function renderList(){
         </div>
         <div class="card-foot">
           ${criticAvg != null ? `<span class="chip critic">Críticos ${criticAvg.toFixed(0)}/100</span>` : ""}
+          ${w.oak && /crianza|barricado/i.test(w.oak) ? `<span class="chip" style="background:#8a5a2b;">🛢 Crianza</span>` : ""}
           ${w.status === "wishlist" && w.recommended_by ? `<span class="chip">💬 ${w.recommended_by}</span>` : ""}
           <button class="like-btn ${like.mine ? "liked":""}" data-like="${w.id}">
             <span class="heart">${like.mine ? "♥" : "♡"}</span>${like.count || ""}
@@ -1135,19 +1190,20 @@ $("saveWineBtn").onclick = async () => {
     row.country = $("f_country").value.trim();
     row.grape = $("f_grape").value.trim();
     row.price_usd = $("f_price").value ? Number($("f_price").value) : null;
+    row.oak = $("f_oak").value || null;
   }
 
   let { error } = await sb.from("wines").insert(row);
-  if (error && /country|grape|price_usd/.test(error.message)){
+  if (error && /country|grape|price_usd|oak/.test(error.message)){
     // columnas nuevas aún no creadas → reintenta sin ellas
     hasExtraCols = false;
-    delete row.country; delete row.grape; delete row.price_usd;
+    delete row.country; delete row.grape; delete row.price_usd; delete row.oak;
     ({ error } = await sb.from("wines").insert(row));
   }
   $("saveWineBtn").textContent = "Guardar 🍷";
   if (error){ toast("Error: " + error.message); return; }
 
-  ["f_name","f_winery","f_vintage","f_region","f_country","f_grape","f_price","f_recommended"].forEach(id => $(id).value = "");
+  ["f_name","f_winery","f_vintage","f_region","f_country","f_grape","f_price","f_oak","f_recommended"].forEach(id => $(id).value = "");
   photoFile = null;
   $("photoPreview").classList.add("hidden");
   $("f_photo_camera").value = ""; $("f_photo_gallery").value = "";
@@ -1162,8 +1218,10 @@ async function openDetail(wine){
   $("d_winery").textContent = wine.winery || "";
   $("d_name").textContent = wine.name + (wine.vintage ? " " + wine.vintage : "");
   $("d_meta").textContent = [wine.region, wine.country, wine.grape,
+    wine.oak ? `🛢 ${wine.oak}` : null,
     wine.price_usd ? `~US$ ${Number(wine.price_usd)}` : null,
     `subido por ${profilesById[wine.added_by] || "alguien"}`].filter(Boolean).join(" · ");
+  buildTasteSliders();
   $("deleteWineBtn").classList.toggle("hidden", wine.added_by !== currentUser.id);
   if (wine.photo_url){
     $("d_photo").src = wine.photo_url;
@@ -1232,14 +1290,64 @@ starEls.forEach((el,i) => {
   });
 });
 
+/* ---------------- PERFIL DE SABOR ---------------- */
+function buildTasteSliders(){
+  const box = $("tasteSliders");
+  box.innerHTML = `<div class="helper" style="margin-bottom:8px;">Perfil de sabor (opcional): mové solo los que quieras opinar.</div>` +
+    TASTE_AXES.map(a => `
+    <div class="taste-slider" data-axis="${a.k}">
+      <span>${a.l}</span>
+      <input type="range" min="0" max="100" value="50" style="accent-color:${a.c}" />
+      <span class="rlab">${a.r}</span>
+    </div>`).join("");
+  box.querySelectorAll(".taste-slider input").forEach(inp => {
+    inp.oninput = () => { inp.closest(".taste-slider").classList.add("touched"); inp.dataset.dirty = "1"; };
+  });
+}
+
+function renderTasteBoard(rows){
+  const board = $("tasteBoard");
+  if (!hasTasteCols){
+    board.innerHTML = `<div class="helper">Para activar el perfil de sabor hay que correr el SQL nuevo en Supabase (mirá las instrucciones).</div>`;
+    $("tasteSliders").classList.add("hidden");
+    return;
+  }
+  $("tasteSliders").classList.remove("hidden");
+  let any = false;
+  board.innerHTML = TASTE_AXES.map(a => {
+    const vals = rows.map(r => r[a.k]).filter(v => v !== null && v !== undefined);
+    if (!vals.length) return "";
+    any = true;
+    const pct = Math.max(0, Math.min(80, avg(vals) - 10)); // pill del 20% centrada en el promedio
+    return `<div class="taste-row">
+      <span>${a.l}</span>
+      <div class="taste-track"><div class="taste-pill" style="left:${pct}%; background:${a.c};"></div></div>
+      <span class="rlab">${a.r}</span>
+    </div>`;
+  }).join("");
+  if (!any) board.innerHTML = `<div class="helper">Nadie marcó el perfil de sabor todavía. Movete los deslizadores de abajo y guardá tu puntaje. 👇</div>`;
+}
+
 $("addRatingBtn").onclick = async () => {
   if (!myStars){ toast("Elegí cuántas estrellas primero ⭐"); return; }
-  const { error } = await sb.from("group_ratings").upsert({
+  const row = {
     wine_id: currentWine.id,
     user_id: currentUser.id,
     score: Math.round(myStars*20),         // guardamos 0-100 (compatible con lo viejo)
     comment: $("f_myComment").value.trim()
-  }, { onConflict: "wine_id,user_id" });
+  };
+  if (hasTasteCols){
+    document.querySelectorAll("#tasteSliders .taste-slider").forEach(sl => {
+      const inp = sl.querySelector("input");
+      if (inp.dataset.dirty) row[sl.dataset.axis] = Number(inp.value);
+    });
+  }
+  let { error } = await sb.from("group_ratings").upsert(row, { onConflict: "wine_id,user_id" });
+  if (error && /body|tannin|sweetness|acidity|oak_fruit/.test(error.message)){
+    hasTasteCols = false;
+    TASTE_AXES.forEach(a => delete row[a.k]);
+    ({ error } = await sb.from("group_ratings").upsert(row, { onConflict: "wine_id,user_id" }));
+  }
   if (error){ toast("Error: " + error.message); return; }
   toast("¡Guardado! 🙌");
   await renderRatings();
@@ -1247,20 +1355,41 @@ $("addRatingBtn").onclick = async () => {
 };
 
 async function renderRatings(){
-  const { data } = await sb.from("group_ratings")
-    .select("score, comment, user_id, profiles(display_name)")
-    .eq("wine_id", currentWine.id).order("created_at", { ascending:false });
+  const tasteCols = TASTE_AXES.map(a => a.k).join(", ");
+  let res = hasTasteCols
+    ? await sb.from("group_ratings").select(`score, comment, user_id, ${tasteCols}, profiles(display_name)`)
+        .eq("wine_id", currentWine.id).order("created_at", { ascending:false })
+    : null;
+  if (!res || res.error){
+    if (res && res.error) hasTasteCols = false;   // columnas de sabor aún no creadas
+    res = await sb.from("group_ratings").select("score, comment, user_id, profiles(display_name)")
+      .eq("wine_id", currentWine.id).order("created_at", { ascending:false });
+  }
+  const rows = res.data || [];
   const list = $("ratingList"); list.innerHTML = "";
-  const rows = data || [];
   rows.forEach(r => {
     const s = toStars(r.score);
     const div = document.createElement("div");
     div.className = "comment";
     div.innerHTML = `<div class="head"><span class="who">${(r.profiles && r.profiles.display_name) || "alguien"}</span>${starsHTML(s,13)}</div>${r.comment || ""}`;
     list.appendChild(div);
-    if (r.user_id === currentUser.id && !myStars){ setStarInput(s); $("f_myComment").value = r.comment || ""; }
+    if (r.user_id === currentUser.id && !myStars){
+      setStarInput(s);
+      $("f_myComment").value = r.comment || "";
+      if (hasTasteCols){
+        document.querySelectorAll("#tasteSliders .taste-slider").forEach(sl => {
+          const v = r[sl.dataset.axis];
+          if (v !== null && v !== undefined){
+            const inp = sl.querySelector("input");
+            inp.value = v; inp.dataset.dirty = "1";
+            sl.classList.add("touched");
+          }
+        });
+      }
+    }
   });
   if (!rows.length) list.innerHTML = `<div class="helper">Todavía nadie opinó. ¡Sé la primera! ⭐</div>`;
+  renderTasteBoard(rows);
   const a = avg(rows.map(r => Number(r.score||0)));
   $("d_avgStars").textContent = a != null ? toStars(a).toFixed(1) : "—";
   $("d_ratingCount").textContent = rows.length;
